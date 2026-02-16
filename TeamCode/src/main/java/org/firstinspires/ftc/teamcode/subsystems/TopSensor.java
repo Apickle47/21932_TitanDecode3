@@ -18,7 +18,7 @@ public class TopSensor {
         topSensor.setGain(4);
     }
 
-    public void findDetectedColor(Telemetry telemetry) {
+    public void update() {
         NormalizedRGBA colors = topSensor.getNormalizedColors();
 
         float normRed, normGreen, normBlue;
@@ -26,11 +26,11 @@ public class TopSensor {
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
 
-        telemetry.addLine("TOP SENSOR");
-        telemetry.addData("red", normRed);
-        telemetry.addData("green", normGreen);
-        telemetry.addData("blue", normBlue);
-        telemetry.addData("Color: ", getColor());
+//        telemetry.addLine("TOP SENSOR");
+//        telemetry.addData("red", normRed);
+//        telemetry.addData("green", normGreen);
+//        telemetry.addData("blue", normBlue);
+//        telemetry.addData("Color: ", getColor());
 
         if ((normGreen > normBlue && normGreen > normRed) && (.055 < normGreen && normGreen < .086)) {
             color = "GREEN";

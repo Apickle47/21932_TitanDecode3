@@ -225,6 +225,11 @@ public class FirstTeleOpRed extends LinearOpMode {
             shooter.update();
             hood.update();
             gate.update();
+            signal.update();
+            rail.update();
+            bottomSensor.update();
+            middleSensor.update();
+            topSensor.update();
 
             telemetry.addLine("SHOOTER:");
             telemetry.addData("Shooter vel", shooter.getVelocity());
@@ -248,6 +253,8 @@ public class FirstTeleOpRed extends LinearOpMode {
             telemetry.addLine("MISC:");
             telemetry.addData("Ball Count", ballCount);
             telemetry.addData("hood angle", hood.getHoodPosition());
+            telemetry.addData("LED Color", signal.getLEDColor());
+            telemetry.addLine();
             telemetry.addLine("COLOR SENSOR");
             telemetry.addData("Bottom Sensor Color", bottomSensor.getColor());
             telemetry.addData("Middle Sensor Color", middleSensor.getColor());

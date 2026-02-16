@@ -17,7 +17,7 @@ public class MiddleSensor {
         middleSensor.setGain(4);
     }
 
-    public void getDetectedColor(Telemetry telemetry) {
+    public void update() {
         NormalizedRGBA colors = middleSensor.getNormalizedColors();
 
         float normRed, normGreen, normBlue;
@@ -25,11 +25,11 @@ public class MiddleSensor {
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
 
-        telemetry.addLine("MIDDLE SENSOR");
-        telemetry.addData("red", normRed);
-        telemetry.addData("green", normGreen);
-        telemetry.addData("blue", normBlue);
-        telemetry.addData("Color: ", getColor());
+//        telemetry.addLine("MIDDLE SENSOR");
+//        telemetry.addData("red", normRed);
+//        telemetry.addData("green", normGreen);
+//        telemetry.addData("blue", normBlue);
+//        telemetry.addData("Color: ", getColor());
 
         if ((normGreen > normBlue && normGreen > normRed) && (.04 < normGreen && normGreen < .18)) {
             color = "GREEN";

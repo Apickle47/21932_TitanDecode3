@@ -23,8 +23,8 @@ public class ColorSensorTest extends OpMode {
 
     @Override
     public void loop() {
-        Bsensor.getDetectedColor(telemetry);
-        Msensor.getDetectedColor(telemetry);
-        Tsensor.findDetectedColor(telemetry);
+        Bsensor.update();
+        Msensor.update();
+        Tsensor.update();
     }
 }

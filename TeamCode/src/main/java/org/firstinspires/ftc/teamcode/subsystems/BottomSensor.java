@@ -4,8 +4,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 import java.util.HashMap;
 
 public class BottomSensor {
@@ -17,7 +15,7 @@ public class BottomSensor {
         bottomSensor.setGain(4);
     }
 
-    public void getDetectedColor(Telemetry telemetry) {
+    public void update() {
         NormalizedRGBA colors = bottomSensor.getNormalizedColors();
 
         float normRed, normGreen, normBlue;
@@ -25,11 +23,11 @@ public class BottomSensor {
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
 
-        telemetry.addLine("BOTTOM SENSOR");
-        telemetry.addData("red", normRed);
-        telemetry.addData("green", normGreen);
-        telemetry.addData("blue", normBlue);
-        telemetry.addData("Color: ", getColor());
+//        telemetry.addLine("BOTTOM SENSOR");
+//        telemetry.addData("red", normRed);
+//        telemetry.addData("green", normGreen);
+//        telemetry.addData("blue", normBlue);
+//        telemetry.addData("Color: ", getColor());
 
         if ((normGreen > normBlue && normGreen > normRed) && (.07 < normGreen && normGreen < .08)) {
             color = "GREEN";
