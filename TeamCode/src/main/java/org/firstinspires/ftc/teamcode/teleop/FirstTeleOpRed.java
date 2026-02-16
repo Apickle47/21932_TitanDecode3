@@ -143,6 +143,7 @@ public class FirstTeleOpRed extends LinearOpMode {
 // INTAKE
             if(gamepad2.right_bumper) {
                 intaking = true;
+                intake.setAllPower(1);
                 if(!shooting) {
                     gate.setPosition(Gate.CLOSE);
                 }
@@ -167,18 +168,18 @@ public class FirstTeleOpRed extends LinearOpMode {
             }
 
 // SENSOR
-            if((Objects.equals(bottomSensor.getColor(), "PURPLE") || Objects.equals(bottomSensor.getColor(), "GREEN")) && (Objects.equals(middleSensor.getColor(), "PURPLE") || Objects.equals(middleSensor.getColor(), "GREEN")) && (Objects.equals(topSensor.getColor(), "PURPLE") || topSensor.getColor().equals("GREEN"))) {
+            if(intaking && ((Objects.equals(bottomSensor.getColor(), "PURPLE") || Objects.equals(bottomSensor.getColor(), "GREEN")) && (Objects.equals(middleSensor.getColor(), "PURPLE") || Objects.equals(middleSensor.getColor(), "GREEN")) && (Objects.equals(topSensor.getColor(), "PURPLE") || topSensor.getColor().equals("GREEN")))) {
                 intake.setAllPower(0);
                 signal.setLEDColor(Signal.GREEN);
             }
-            if((Objects.equals(middleSensor.getColor(), "PURPLE") || Objects.equals(middleSensor.getColor(), "GREEN")) && (Objects.equals(topSensor.getColor(), "PURPLE") || Objects.equals(topSensor.getColor(), "GREEN"))) {
+            if(intaking && ((Objects.equals(middleSensor.getColor(), "PURPLE") || Objects.equals(middleSensor.getColor(), "GREEN")) && (Objects.equals(topSensor.getColor(), "PURPLE") || Objects.equals(topSensor.getColor(), "GREEN")))) {
                 intake.setRollerPower(0);
                 signal.setLEDColor(Signal.YELLOW);
             }
-            if(Objects.equals(topSensor.getColor(), "PURPLE") || Objects.equals(topSensor.getColor(), "GREEN")) {
+            if(intaking && (Objects.equals(topSensor.getColor(), "PURPLE") || Objects.equals(topSensor.getColor(), "GREEN"))) {
                 signal.setLEDColor(Signal.RED);
             }
-            if(Objects.equals(bottomSensor.getColor(), "UNKNOWN") && Objects.equals(middleSensor.getColor(), "UNKNOWN") && Objects.equals(topSensor.getColor(), "UNKNOWN")) {
+            if(intaking && (Objects.equals(bottomSensor.getColor(), "UNKNOWN") && Objects.equals(middleSensor.getColor(), "UNKNOWN") && Objects.equals(topSensor.getColor(), "UNKNOWN"))) {
                 signal.setLEDColor(Signal.VIOLET);
             }
 // DRIVE
@@ -247,6 +248,11 @@ public class FirstTeleOpRed extends LinearOpMode {
             telemetry.addLine("MISC:");
             telemetry.addData("Ball Count", ballCount);
             telemetry.addData("hood angle", hood.getHoodPosition());
+            telemetry.addLine("COLOR SENSOR");
+            telemetry.addData("Bottom Sensor Color", bottomSensor.getColor());
+            telemetry.addData("Middle Sensor Color", middleSensor.getColor());
+            telemetry.addData("Top Sensor Color", topSensor.getColor());
+
 
 
 

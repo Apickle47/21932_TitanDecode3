@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class servoTest extends LinearOpMode {
     public static double change = 0.001;
-    public static String servoName = "rail";
+    public static String servoName = "signal";
 
 
     @Override

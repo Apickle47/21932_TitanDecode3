@@ -13,7 +13,7 @@ public class Signal {
 
 
     public Signal(HardwareMap hardwareMap, HashMap<String, String> config) {
-        signal = hardwareMap.get(Servo.class, config.get("gate"));
+        signal = hardwareMap.get(Servo.class, config.get("signal"));
     }
 
     public void setLEDColor(double color){
