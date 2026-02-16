@@ -67,6 +67,7 @@ public class FirstTeleOpRed extends LinearOpMode {
 
         waitForStart();
 
+        signal.setLEDColor(0.5);
         hood.setHoodPosition(0.7);
         rail.setPosition(Rail.INLINE);
         boolean shooting = false, turretOverride = false, intaking = false, metDistanceSensorThresh = false, keepShooterRunning = true, preshoot = false, manualKicker = false;
@@ -77,6 +78,7 @@ public class FirstTeleOpRed extends LinearOpMode {
 
 
         while(opModeIsActive()) {
+            ballCount = bottomSensor.cb + middleSensor.cm + topSensor.ct;
 // SHOOTER
             pose = turret.getPose();
             shooterTargetSpeed = shooter.calcVelocity(Math.sqrt(
@@ -131,8 +133,8 @@ public class FirstTeleOpRed extends LinearOpMode {
                 if (rail.getPosition() == Rail.INLINE) {
                     rail.setPosition(Rail.INDEX);
                 }
-                else {
-                    rail.setPosition(Rail.INDEX);
+                else if (rail.getPosition() == Rail.INDEX) {
+                    rail.setPosition(Rail.INLINE);
                 }
             }
             if(gamepad2.aWasPressed()) {
@@ -168,6 +170,7 @@ public class FirstTeleOpRed extends LinearOpMode {
             }
 
 // SENSOR
+            /*
             if(intaking && ((Objects.equals(bottomSensor.getColor(), "PURPLE") || Objects.equals(bottomSensor.getColor(), "GREEN")) && (Objects.equals(middleSensor.getColor(), "PURPLE") || Objects.equals(middleSensor.getColor(), "GREEN")) && (Objects.equals(topSensor.getColor(), "PURPLE") || topSensor.getColor().equals("GREEN")))) {
                 intake.setAllPower(0);
                 signal.setLEDColor(Signal.GREEN);
@@ -179,9 +182,25 @@ public class FirstTeleOpRed extends LinearOpMode {
             if(intaking && (Objects.equals(topSensor.getColor(), "PURPLE") || Objects.equals(topSensor.getColor(), "GREEN"))) {
                 signal.setLEDColor(Signal.RED);
             }
+            /*
             if(intaking && (Objects.equals(bottomSensor.getColor(), "UNKNOWN") && Objects.equals(middleSensor.getColor(), "UNKNOWN") && Objects.equals(topSensor.getColor(), "UNKNOWN"))) {
                 signal.setLEDColor(Signal.VIOLET);
             }
+            */
+            //No Balls
+            switch (ballCount) {
+                case(0):
+                    signal.setLEDColor(Signal.VIOLET);
+                case(1):
+                    signal.setLEDColor(Signal.RED);
+                case(2):
+                    intake.setRollerPower(0);
+                    signal.setLEDColor(Signal.YELLOW);
+                case(3):
+                    intake.setAllPower(0);
+                    signal.setLEDColor(Signal.GREEN);
+            }
+
 // DRIVE
             if(gamepad1.left_trigger>.1) {
                 drive.parkMode();
@@ -254,6 +273,7 @@ public class FirstTeleOpRed extends LinearOpMode {
             telemetry.addData("Ball Count", ballCount);
             telemetry.addData("hood angle", hood.getHoodPosition());
             telemetry.addData("LED Color", signal.getLEDColor());
+            telemetry.addData("Rail Position", rail.getPosition());
             telemetry.addLine();
             telemetry.addLine("COLOR SENSOR");
             telemetry.addData("Bottom Sensor Color", bottomSensor.getColor());

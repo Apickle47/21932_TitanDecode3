@@ -7,11 +7,12 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class MiddleSensor {
     NormalizedColorSensor middleSensor;
     private String color;
-
+    public int cm;
     public MiddleSensor(HardwareMap hwMap, HashMap<String, String> config) {
         middleSensor = hwMap.get(NormalizedColorSensor.class, config.get("middleSensor"));
         middleSensor.setGain(4);
@@ -38,8 +39,15 @@ public class MiddleSensor {
         } else {
             color = "UNKNOWN";
         }
+        cm = ballCount();
     }
     public String getColor() {
         return color;
+    }
+    public boolean hasBall() {
+        return !(Objects.equals(color, "UNKNOWN"));
+    }
+    public int ballCount() {
+        return (hasBall() ? 0:1);
     }
 }

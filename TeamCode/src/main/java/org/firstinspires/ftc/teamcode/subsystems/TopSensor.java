@@ -12,7 +12,7 @@ import java.util.Objects;
 public class TopSensor {
     NormalizedColorSensor topSensor;
     private String color;
-
+    public int ct;
     public TopSensor(HardwareMap hwMap, HashMap<String, String> config) {
         topSensor = hwMap.get(NormalizedColorSensor.class, config.get("topSensor"));
         topSensor.setGain(4);
@@ -39,6 +39,8 @@ public class TopSensor {
         } else {
             color = "UNKNOWN";
         }
+        ct = ballCount();
+
     }
     public String getColor() {
         return color;
@@ -46,5 +48,8 @@ public class TopSensor {
 
     public boolean hasBall() {
         return !(Objects.equals(color, "UNKNOWN"));
+    }
+    public int ballCount() {
+        return (hasBall() ? 0:1);
     }
 }

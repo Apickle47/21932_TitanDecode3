@@ -5,11 +5,12 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class BottomSensor {
     NormalizedColorSensor bottomSensor;
     private String color;
-
+    public int cb;
     public BottomSensor(HardwareMap hwMap, HashMap<String, String> config) {
         bottomSensor = hwMap.get(NormalizedColorSensor.class, config.get("bottomSensor"));
         bottomSensor.setGain(4);
@@ -38,8 +39,17 @@ public class BottomSensor {
         else {
             color = "UNKNOWN";
         }
+        cb = ballCount();
+
     }
     public String getColor() {
         return color;
     }
+    public boolean hasBall() {
+        return !(Objects.equals(color, "UNKNOWN"));
+    }
+    public int ballCount() {
+        return (hasBall() ? 0:1);
+    }
+
 }
