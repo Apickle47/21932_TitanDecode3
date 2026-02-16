@@ -10,7 +10,7 @@ public class Signal {
 
     public static double GREEN = 0.5, YELLOW = 0.388, RED = 0.28, VIOLET = 0.722;
     private double color = VIOLET;
- 
+
 
     public Signal(HardwareMap hardwareMap, HashMap<String, String> config) {
         signal = hardwareMap.get(Servo.class, config.get("signal"));

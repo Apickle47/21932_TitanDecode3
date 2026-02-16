@@ -127,14 +127,11 @@ public class FirstTeleOpRed extends LinearOpMode {
                 Mortar.closeB += 50;
                 Mortar.farB += 50;
             }
-            if(gamepad1.aWasPressed()) {
-                if(!indexing) {
+            if (gamepad1.aWasPressed()) {
+                if (rail.getPosition() == Rail.INLINE) {
                     rail.setPosition(Rail.INDEX);
-                    indexing = true;
-                }
-                if(indexing) {
+                } else if (rail.getPosition() == Rail.INDEX) {
                     rail.setPosition(Rail.INLINE);
-                    indexing = false;
                 }
             }
             if (gamepad2.aWasPressed()) {
@@ -186,7 +183,7 @@ public class FirstTeleOpRed extends LinearOpMode {
                 signal.setLEDColor(Signal.VIOLET);
             }
             */
-            if (intaking) {
+            if (intaking & !shooting) {
                 if (ballCount == 0) {
                     intake.setAllPower(1);
                     signal.setPosition(Signal.VIOLET);
@@ -203,8 +200,11 @@ public class FirstTeleOpRed extends LinearOpMode {
                 }
             }
             else {
-                intake.setAllPower(0);
-                if (ballCount == 0) {signal.setPosition(1);}
+                if (!shooting) {
+                intake.setAllPower(0); }
+                if (ballCount == 0) {
+                    signal.setPosition(1);
+                }
             }
 
 

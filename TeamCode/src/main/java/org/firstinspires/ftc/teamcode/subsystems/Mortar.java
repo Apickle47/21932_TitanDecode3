@@ -18,7 +18,7 @@ public class Mortar {
     public static double THRESH = 25;
     public static double OFF = 0, MAX = 1, NORMAL = 0.6, WAIT = 1400;
     public static double slope = 5.9343, closeB = 1015, farB = 1285;
-    public static double p = 5589, i = 0, d = 0, f = 33.6;
+    public static double p = 200, i = 0, d = 0, f = 13;
 
 
 
@@ -26,6 +26,7 @@ public class Mortar {
         flyMotor = hardwareMap.get(DcMotorEx.class, config.get("shooter"));
         flyMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         flyMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(p, i, d, f));
+        flyMotor.setDirection(Direction.REVERSE);
 
         flyMotor2 = hardwareMap.get(DcMotorEx.class, config.get("shooterTwo"));
         flyMotor2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
@@ -66,7 +67,7 @@ public class Mortar {
     }
 
     public void update() {
-        //flyMotor.setPower(power);
+        flyMotor.setPower(power);
         flyMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(p, 0, 0, f));
         flyMotor2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(p, 0, 0, f));
         flyMotor.setVelocity(vel);
