@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -26,11 +28,11 @@ public class TopSensor {
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
 
-//        telemetry.addLine("TOP SENSOR");
-//        telemetry.addData("red", normRed);
-//        telemetry.addData("green", normGreen);
-//        telemetry.addData("blue", normBlue);
-//        telemetry.addData("Color: ", getColor());
+        //telemetry.addLine("TOP SENSOR");
+        //telemetry.addData("red", normRed);
+        //telemetry.addData("green", normGreen);
+        //telemetry.addData("blue", normBlue);
+        //telemetry.addData("Color: ", getColor());
 
         if ((normGreen > normBlue && normGreen > normRed) && (.055 < normGreen && normGreen < .086)) {
             color = "GREEN";
@@ -39,17 +41,14 @@ public class TopSensor {
         } else {
             color = "UNKNOWN";
         }
-        ct = ballCount();
 
     }
     public String getColor() {
         return color;
     }
 
-    public boolean hasBall() {
-        return !(Objects.equals(color, "UNKNOWN"));
+    public int hasBall() {
+        return (!(Objects.equals(color, "UNKNOWN"))) ? 1 : 0;
     }
-    public int ballCount() {
-        return (hasBall() ? 0:1);
-    }
+
 }

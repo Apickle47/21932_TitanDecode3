@@ -20,7 +20,7 @@ public class Intake {
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rollers.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        rollers.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rollers.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

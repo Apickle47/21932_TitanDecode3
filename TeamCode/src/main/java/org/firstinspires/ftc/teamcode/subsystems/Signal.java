@@ -8,9 +8,9 @@ import java.util.HashMap;
 public class Signal {
     private Servo signal;
 
-    public static double GREEN = 0.5, YELLOW = 0.388, RED = 0.277, VIOLET = 0.722;
+    public static double GREEN = 0.5, YELLOW = 0.388, RED = 0.28, VIOLET = 0.722;
     private double color = VIOLET;
-
+ 
 
     public Signal(HardwareMap hardwareMap, HashMap<String, String> config) {
         signal = hardwareMap.get(Servo.class, config.get("signal"));
@@ -28,5 +28,9 @@ public class Signal {
 
     public double getLEDColor() {
         return signal.getPosition();
+    }
+
+    public void setPosition(double color) {
+        signal.setPosition(color);
     }
 }

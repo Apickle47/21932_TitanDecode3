@@ -67,7 +67,6 @@ public class FirstTeleOpRed extends LinearOpMode {
 
         waitForStart();
 
-        signal.setLEDColor(0.5);
         hood.setHoodPosition(0.7);
         rail.setPosition(Rail.INLINE);
         boolean shooting = false, turretOverride = false, intaking = false, metDistanceSensorThresh = false, keepShooterRunning = true, preshoot = false, manualKicker = false;
@@ -78,7 +77,7 @@ public class FirstTeleOpRed extends LinearOpMode {
 
 
         while(opModeIsActive()) {
-            ballCount = bottomSensor.cb + middleSensor.cm + topSensor.ct;
+            ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
 // SHOOTER
             pose = turret.getPose();
             shooterTargetSpeed = shooter.calcVelocity(Math.sqrt(
@@ -93,7 +92,7 @@ public class FirstTeleOpRed extends LinearOpMode {
             }
 
             if (shooting || preshoot) {
-                if(!turretOverride) {
+                if (!turretOverride) {
                     Turret.tracking = true;
                 }
                 shooter.setVelocity(shooterTargetSpeed);
@@ -111,53 +110,50 @@ public class FirstTeleOpRed extends LinearOpMode {
                 gate.setPosition(Gate.CLOSE);
             }
 
-            if(!shooting && !preshoot) {
-                if(keepShooterRunning) {
+            if (!shooting && !preshoot) {
+                if (keepShooterRunning) {
                     shooter.setVelocity(Mortar.WAIT);
-                }
-                else {
+                } else {
                     shooter.setVelocity(0);
                 }
             }
 
-            if(gamepad1.dpadDownWasPressed()) {
+            if (gamepad1.dpadDownWasPressed()) {
                 Mortar.closeB -= 50;
                 Mortar.farB -= 50;
             }
 
-            if(gamepad1.dpadUpWasPressed()) {
+            if (gamepad1.dpadUpWasPressed()) {
                 Mortar.closeB += 50;
                 Mortar.farB += 50;
             }
-            if(gamepad1.aWasPressed()) {
+            if (gamepad1.aWasPressed()) {
                 if (rail.getPosition() == Rail.INLINE) {
                     rail.setPosition(Rail.INDEX);
-                }
-                else if (rail.getPosition() == Rail.INDEX) {
+                } else if (rail.getPosition() == Rail.INDEX) {
                     rail.setPosition(Rail.INLINE);
                 }
             }
-            if(gamepad2.aWasPressed()) {
+            if (gamepad2.aWasPressed()) {
                 keepShooterRunning = !keepShooterRunning;
             }
 
 
 // INTAKE
-            if(gamepad2.right_bumper) {
+            if (gamepad2.right_bumper) {
                 intaking = true;
-                intake.setAllPower(1);
-                if(!shooting) {
+                if (!shooting) {
                     gate.setPosition(Gate.CLOSE);
                 }
             }
-            if(gamepad2.yWasPressed()) {
+            if (gamepad2.yWasPressed()) {
                 intake.setAllPower(reverseIntakeSpeed);
             }
-            if(gamepad2.yWasReleased()) {
+            if (gamepad2.yWasReleased()) {
                 intake.setAllPower(0);
             }
 
-            if(gamepad2.left_bumper) {
+            if (gamepad2.left_bumper) {
                 intaking = false;
                 intake.setAllPower(0);
             }
@@ -187,19 +183,27 @@ public class FirstTeleOpRed extends LinearOpMode {
                 signal.setLEDColor(Signal.VIOLET);
             }
             */
-            //No Balls
-            switch (ballCount) {
-                case(0):
-                    signal.setLEDColor(Signal.VIOLET);
-                case(1):
-                    signal.setLEDColor(Signal.RED);
-                case(2):
+            if (intaking) {
+                if (ballCount == 0) {
+                    intake.setAllPower(1);
+                    signal.setPosition(Signal.VIOLET);
+                } else if (ballCount == 1) {
+                    intake.setAllPower(1);
+                    signal.setPosition(Signal.RED);
+                } else if (ballCount == 2) {
                     intake.setRollerPower(0);
-                    signal.setLEDColor(Signal.YELLOW);
-                case(3):
-                    intake.setAllPower(0);
-                    signal.setLEDColor(Signal.GREEN);
+                    intake.setIntakePower(1);
+                    signal.setPosition(Signal.YELLOW);
+                } else if (ballCount == 3) {
+                    intaking = false;
+                    signal.setPosition(Signal.GREEN);
+                }
             }
+            else {
+                intake.setAllPower(0);
+                if (ballCount == 0) {signal.setPosition(1);}
+            }
+
 
 // DRIVE
             if(gamepad1.left_trigger>.1) {
@@ -244,7 +248,7 @@ public class FirstTeleOpRed extends LinearOpMode {
             shooter.update();
             hood.update();
             gate.update();
-            signal.update();
+            //signal.update();
             rail.update();
             bottomSensor.update();
             middleSensor.update();
@@ -274,6 +278,7 @@ public class FirstTeleOpRed extends LinearOpMode {
             telemetry.addData("hood angle", hood.getHoodPosition());
             telemetry.addData("LED Color", signal.getLEDColor());
             telemetry.addData("Rail Position", rail.getPosition());
+            telemetry.addData("Intaking?", intaking);
             telemetry.addLine();
             telemetry.addLine("COLOR SENSOR");
             telemetry.addData("Bottom Sensor Color", bottomSensor.getColor());
