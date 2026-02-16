@@ -10,15 +10,18 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 
 @TeleOp
 public class ColorSensorTest extends OpMode {
-    Util util = new Util();
-    BottomSensor Bsensor = new BottomSensor(hardwareMap, util.deviceConf);
-    MiddleSensor Msensor = new MiddleSensor(hardwareMap, util.deviceConf);
-    TopSensor Tsensor = new TopSensor(hardwareMap, util.deviceConf);
 
-
+    Util util;
+    BottomSensor Bsensor;
+    MiddleSensor Msensor;
+    TopSensor Tsensor;
 
     @Override
     public void init() {
+        util = new Util();
+        Bsensor = new BottomSensor(hardwareMap, util.deviceConf);
+        Msensor = new MiddleSensor(hardwareMap, util.deviceConf);
+        Tsensor = new TopSensor(hardwareMap, util.deviceConf);
     }
 
     @Override
