@@ -33,7 +33,7 @@ public class FirstTeleOpRed extends LinearOpMode {
     //SENSOR
     public static int sensorThresh = 20, brightness = 50;
     //
-
+    public static boolean indexing;
     public static double reverseIntakeSpeed = -.75;
     public static int maxTurretChange = 10;
     public static int kickerWaitTime = 500;
@@ -127,11 +127,14 @@ public class FirstTeleOpRed extends LinearOpMode {
                 Mortar.closeB += 50;
                 Mortar.farB += 50;
             }
-            if (gamepad1.aWasPressed()) {
-                if (rail.getPosition() == Rail.INLINE) {
+            if(gamepad1.aWasPressed()) {
+                if(!indexing) {
                     rail.setPosition(Rail.INDEX);
-                } else if (rail.getPosition() == Rail.INDEX) {
+                    indexing = true;
+                }
+                if(indexing) {
                     rail.setPosition(Rail.INLINE);
+                    indexing = false;
                 }
             }
             if (gamepad2.aWasPressed()) {
