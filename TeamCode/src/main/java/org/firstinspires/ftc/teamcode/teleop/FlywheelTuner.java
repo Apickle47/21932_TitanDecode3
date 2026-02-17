@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleop;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-
+@Configurable
 @TeleOp
 public class FlywheelTuner extends OpMode{
     public DcMotorEx Flywheel1;

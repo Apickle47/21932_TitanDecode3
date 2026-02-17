@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
+@Configurable
 @TeleOp
 public class servoTest extends LinearOpMode {
     public static double change = 0.001;
-    public static String servoName = "signal";
+    public static String servoName = "hood";
 
 
     @Override

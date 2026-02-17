@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -14,7 +15,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Mortar;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Util;
 
-
+@Configurable
 @TeleOp(name = "TestShooter")
 public class TestShooter extends LinearOpMode {
     public static double vel = 0, intakeSpeed = 1;

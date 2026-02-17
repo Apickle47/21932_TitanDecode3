@@ -20,11 +20,11 @@ public class Turret {
     private static Follower follower;
     //private PinpointLocalizer localizer;
 
-    private double ticksPerRad = (384.5*((double)85/25)) / (2*Math.PI);;
+    private double ticksPerRad = (384.5*((double)85/25)) / (2*Math.PI);
 
     private double rotationLimit = Math.PI * 208;
 
-    public static double rotationSpeed = 1, maxRange = maxRange = Math.toRadians(355) * 88/85;
+    public static double rotationSpeed = 1, maxRange = Math.toRadians(355) * 108/96;
     private double x, y, heading, turretHeading, turretHeadingRelative;
 
     public static boolean tracking = false;
@@ -33,8 +33,8 @@ public class Turret {
 
     private Pose pose;
 
-    public static Pose blueBasket = new Pose(0,144);
-    public static Pose redBasket = new Pose(144, 144);
+    public static Pose blueBasket = new Pose(0,140);
+    public static Pose redBasket = new Pose(150, 135);
     public static Pose curBasket;
 
     public static double angleOffset = 0;
@@ -45,10 +45,6 @@ public class Turret {
         pose = startPos;
         servoTurret = hardwareMap.get(Servo.class, config.get("turret"));
         servoTurret2 = hardwareMap.get(Servo.class, config.get("turret2"));
-//        turret = hardwareMap.get(DcMotor.class, config.get("turretMotor"));
-//
-//        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public Pose getPose() {
@@ -86,14 +82,14 @@ public class Turret {
     public void update() {
 
         //drive.updatePoseEstimate();
-        follower.update();
         //pose = drive.localizer.getPose();
         pose = follower.getPose();
         x = follower.getPose().getX();
         y = follower.getPose().getY();
         heading = pose.getHeading();
+        follower.update();
 
-        turretHeadingRelative = Math.atan2(curBasket.getY() -y, curBasket.getX() -x);
+        turretHeadingRelative = Math.atan2(curBasket.getPose().getY() -y, curBasket.getPose().getX() -x);
         turretHeading = turretHeadingRelative - heading;
 
         turretHeading+=angleOffset;
@@ -113,12 +109,12 @@ public class Turret {
         }
 
         if(tracking) {
-            servoTurret.setPosition((-turretHeading / (maxRange)) + .5);
-            servoTurret2.setPosition((-turretHeading / (maxRange)) + .5);
+            servoTurret.setPosition((turretHeading / (maxRange)) + .5);
+            servoTurret2.setPosition((turretHeading / (maxRange)) + .5);
         }
         else {
-            servoTurret.setPosition((-pos/maxRange) + .5);
-            servoTurret2.setPosition((-pos/maxRange) + .5);
+            servoTurret.setPosition((pos/maxRange) + .5);
+            servoTurret2.setPosition((pos/maxRange) + .5);
         }
 
         //for turret with motor
