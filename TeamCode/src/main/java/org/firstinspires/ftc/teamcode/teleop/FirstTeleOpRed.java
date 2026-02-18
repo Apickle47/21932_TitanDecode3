@@ -178,23 +178,6 @@ public class FirstTeleOpRed extends LinearOpMode {
             }
 
 // SENSOR
-            /*
-            if(intaking && ((Objects.equals(bottomSensor.getColor(), "PURPLE") || Objects.equals(bottomSensor.getColor(), "GREEN")) && (Objects.equals(middleSensor.getColor(), "PURPLE") || Objects.equals(middleSensor.getColor(), "GREEN")) && (Objects.equals(topSensor.getColor(), "PURPLE") || topSensor.getColor().equals("GREEN")))) {
-                intake.setAllPower(0);
-                signal.setLEDColor(Signal.GREEN);
-            }
-            if(intaking && ((Objects.equals(middleSensor.getColor(), "PURPLE") || Objects.equals(middleSensor.getColor(), "GREEN")) && (Objects.equals(topSensor.getColor(), "PURPLE") || Objects.equals(topSensor.getColor(), "GREEN")))) {
-                intake.setRollerPower(0);
-                signal.setLEDColor(Signal.YELLOW);
-            }
-            if(intaking && (Objects.equals(topSensor.getColor(), "PURPLE") || Objects.equals(topSensor.getColor(), "GREEN"))) {
-                signal.setLEDColor(Signal.RED);
-            }
-            /*
-            if(intaking && (Objects.equals(bottomSensor.getColor(), "UNKNOWN") && Objects.equals(middleSensor.getColor(), "UNKNOWN") && Objects.equals(topSensor.getColor(), "UNKNOWN"))) {
-                signal.setLEDColor(Signal.VIOLET);
-            }
-            */
             if (intaking & !shooting) {
                 if (ballCount == 0) {
                     signal.setPosition(Signal.VIOLET);
@@ -214,6 +197,9 @@ public class FirstTeleOpRed extends LinearOpMode {
                     }
                 } else if (ballCount == 3) {
                     signal.setPosition(Signal.GREEN);
+                    if (!gamepad2.yWasPressed()) {
+                        intake.setAllPower(0);
+                    }
                     intaking = false;
                 }
             }
@@ -228,21 +214,23 @@ public class FirstTeleOpRed extends LinearOpMode {
 
 // DRIVE
             if(gamepad1.left_trigger>.1) {
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y * .3,
-                        -gamepad1.left_stick_x * .3,
-                        -gamepad1.right_stick_x * .3,
-                        true // Robot Centric
-                );
+                drive.parkMode();
+//                follower.setTeleOpDrive(
+//                        -gamepad1.left_stick_y * .3,
+//                        -gamepad1.left_stick_x * .3,
+//                        -gamepad1.right_stick_x * .3,
+//                        true // Robot Centric
+//                );
             }
 
             if(gamepad1.left_trigger<=.1) {
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x,
-                        true // Robot Centric
-                );
+                drive.speedMode();
+//                follower.setTeleOpDrive(
+//                        -gamepad1.left_stick_y,
+//                        -gamepad1.left_stick_x,
+//                        -gamepad1.right_stick_x,
+//                        true // Robot Centric
+//                );
             }
             // TURRET
             if(gamepad2.xWasPressed()) {
@@ -253,16 +241,7 @@ public class FirstTeleOpRed extends LinearOpMode {
                 }
             }
 
-//            if(!shooting && !turretOverride) {
-//                turret.setPosition(0);
-//            }
-
-//            if (turretOverride) {
-//                turret.setPosition((int) (turret.getTargetPosition() + (maxTurretChange * -gamepad2.right_stick_x)));
-//            }
-
             if (gamepad1.y && gamepad1.dpad_left) {
-                //turret.resetEncoder();
                 turret.resetRobotPose(resetPose);
             }
 
@@ -307,7 +286,6 @@ public class FirstTeleOpRed extends LinearOpMode {
             telemetryM.addData("Turret target", turret.getTurretHeading());
             telemetryM.addData("Turret Manual Override", turretOverride);
             telemetryM.addLine("");
-            //telemetry.addData("DISTANCE:", sensor.getDistance());
             telemetryM.addLine("MISC:");
             telemetryM.addData("Ball Count", ballCount);
             telemetryM.addData("hood angle", hood.getHoodPosition());
@@ -321,10 +299,38 @@ public class FirstTeleOpRed extends LinearOpMode {
             telemetryM.addData("Top Sensor Color", topSensor.getColor());
 
 
+            telemetry.addLine("SHOOTER:");
+            telemetry.addData("Shooter vel", shooter.getVelocity());
+            telemetry.addData("Shooter target vel", shooter.getTargetVelocity());
+            telemetry.addData("Keep Shooter Running", keepShooterRunning);
+            telemetry.addData("Preshoot", preshoot);
+            telemetry.addData("closeB", Mortar.closeB);
+            telemetry.addData("farB", Mortar.farB);
+            telemetry.addLine("");
+            telemetry.addLine("POSE:");
+            telemetry.addData("pose x", pose.getX());
+            telemetry.addData("pose y", pose.getY());
+            telemetry.addData("pose heading", Math.toDegrees(pose.getHeading()));
+            telemetry.addLine("");
+            telemetry.addLine("TURRET:");
+            telemetry.addData("Turret Heading relative", turret.getTurretHeadingRelative());
+            telemetry.addData("Turret target", turret.getTurretHeading());
+            telemetry.addData("Turret Manual Override", turretOverride);
+            telemetry.addLine("");
+            telemetry.addLine("MISC:");
+            telemetry.addData("Ball Count", ballCount);
+            telemetry.addData("hood angle", hood.getHoodPosition());
+            telemetry.addData("LED Color", signal.getLEDColor());
+            telemetry.addData("Rail Position", rail.getPosition());
+            telemetry.addData("Intaking?", intaking);
+            telemetry.addLine("");
+            telemetry.addLine("COLOR SENSOR");
+            telemetry.addData("Bottom Sensor Color", bottomSensor.getColor());
+            telemetry.addData("Middle Sensor Color", middleSensor.getColor());
+            telemetry.addData("Top Sensor Color", topSensor.getColor());
 
-
-            //telemetry.addData("Manual Kicker", manualKicker);
             telemetryM.update();
+            telemetry.update();
 
         }
     }

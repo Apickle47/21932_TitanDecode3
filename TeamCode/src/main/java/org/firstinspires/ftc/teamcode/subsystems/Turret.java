@@ -101,12 +101,12 @@ public class Turret {
         else if(turretHeading<-Math.PI) {
             turretHeading += 2*Math.PI;
         }
-        if(turretHeading < -Math.PI/2) {
-            turretHeading = -Math.PI/2;
-        }
-        if(turretHeading > Math.PI/2) {
-            turretHeading = Math.PI/2;
-        }
+//        if(turretHeading < -Math.PI/2) {
+//            turretHeading = -Math.PI/2;
+//        }
+//        if(turretHeading > Math.PI/2) {
+//            turretHeading = Math.PI/2;
+//        }
 
         if(tracking) {
             servoTurret.setPosition((turretHeading / (maxRange)) + .5);
