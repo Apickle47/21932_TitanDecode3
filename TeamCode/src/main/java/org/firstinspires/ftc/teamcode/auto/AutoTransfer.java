@@ -11,10 +11,15 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.subsystems.BottomSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Gate;
 import org.firstinspires.ftc.teamcode.subsystems.Hood;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.MiddleSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Mortar;
+import org.firstinspires.ftc.teamcode.subsystems.Rail;
+import org.firstinspires.ftc.teamcode.subsystems.Signal;
+import org.firstinspires.ftc.teamcode.subsystems.TopSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Util;
 
@@ -24,6 +29,7 @@ public class AutoTransfer extends OpMode{
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
+    private int ballCount;
 
 
 
@@ -33,12 +39,18 @@ public class AutoTransfer extends OpMode{
     Intake intake;
     Gate gate;
     Hood hood;
+    Signal signal;
+    Rail rail;
+    BottomSensor bottomSensor;
+    MiddleSensor middleSensor;
+    TopSensor topSensor;
+
     public static int KICKER_WAIT_TIME = 600;
 
     private int shooterTargetSpeed;
     private int launchCount, shootPoseCount, launchIf;
     private double target;
-    private boolean closeGate = false, stopLaunch = false;
+    private boolean stopLaunch = false;
 
     ElapsedTime time1 = new ElapsedTime();
 
@@ -46,7 +58,7 @@ public class AutoTransfer extends OpMode{
 
 
 
-    enum PathState {
+    public enum PathState {
         // START POSITION_END POSITION
         // DRIVE > MOVEMENT STATE
         // SHOOT > ATTEMPT TO SCORE THE ARTIFACT
@@ -138,7 +150,7 @@ public class AutoTransfer extends OpMode{
 
     }
 
-    public void statePathUpdate() throws InterruptedException {
+    public void statePathUpdate() {
         switch(pathState) {
             case DRIVE_START_POS_SHOOT_POS:
                 follower.followPath(driveStartPosShootPos, true);
@@ -146,20 +158,19 @@ public class AutoTransfer extends OpMode{
                 break;
             case SHOOT_PRELOAD:
                 // check is follower done its path?
+                if(opModeTimer.getElapsedTime() >= 1750 && !stopLaunch) {
+                    Launch();
+                    shootPoseCount++;
+                }
                 if (!follower.isBusy()) {
-                    if(opModeTimer.getElapsedTime() >= 1750 && !stopLaunch) {
-                        Launch();
-                        shootPoseCount++;
-                        follower.followPath(spikeOne, true);
-                        intake.setAllPower(1);
-                        setPathState(PathState.SPIKE_ONE);
-                    }
+                    follower.followPath(spikeOne, true);
+                    startIntake();
+                    setPathState(PathState.SPIKE_ONE);
                 }
                 break;
             case SPIKE_ONE:
                 if (!follower.isBusy()) {
                     follower.followPath(returnToShoot1, true);
-                    intake.setAllPower(0);
                     setPathState(PathState.RETURN_SHOOT1);
                 }
                 break;
@@ -169,20 +180,18 @@ public class AutoTransfer extends OpMode{
                     shootPoseCount++;
                     telemetry.addLine("two" + opModeTimer.getElapsedTime());
                     follower.followPath(setUpTwo, true);
-                    intake.setAllPower(0);
                     setPathState(PathState.SET_UP2);
                 }
                 break;
             case SET_UP2:
                 if (!follower.isBusy()) {
                     follower.followPath(spikeTwo, true);
-                    intake.setAllPower(1);
+                    startIntake();
                     setPathState(PathState.SPIKE_TWO);
                 }
             case SPIKE_TWO:
                 if (!follower.isBusy()) {
                     follower.followPath(returnToShoot2, true);
-                    intake.setAllPower(0);
                     setPathState(PathState.RETURN_SHOOT2);
                 }
             case RETURN_SHOOT2:
@@ -190,20 +199,18 @@ public class AutoTransfer extends OpMode{
                     Launch();
                     shootPoseCount++;
                     follower.followPath(setUpThree, true);
-                    intake.setAllPower(0);
                     setPathState(PathState.SET_UP3);
                 }
                 break;
             case SET_UP3:
                 if (!follower.isBusy()) {
                     follower.followPath(spikeThree, true);
-                    intake.setAllPower(1);
+                    startIntake();
                     setPathState(PathState.SPIKE_THREE);
                 }
             case SPIKE_THREE:
                 if (!follower.isBusy()) {
                     follower.followPath(returnToShoot3, true);
-                    intake.setAllPower(0);
                     setPathState(PathState.RETURN_SHOOT3);
                 }
             case RETURN_SHOOT3:
@@ -212,20 +219,18 @@ public class AutoTransfer extends OpMode{
                     shootPoseCount++;
                     telemetry.addLine("four" + opModeTimer.getElapsedTime());
                     follower.followPath(setUpHuman, true);
-                    intake.setAllPower(0);
                     setPathState(PathState.SET_UP_HUMAN);
                 }
             case SET_UP_HUMAN:
                 if (!follower.isBusy()) {
                     follower.followPath(human, true);
-                    intake.setAllPower(1);
+                    startIntake();
                     setPathState(PathState.HUMAN);
                 }
             case HUMAN:
                 if (!follower.isBusy()) {
                     follower.followPath(returnShootHuman);
                     setPathState(PathState.RETURN_SHOOT_HUMAN);
-                    intake.setAllPower(0);
                 }
             case RETURN_SHOOT_HUMAN:
                 if (!follower.isBusy()) {
@@ -233,7 +238,6 @@ public class AutoTransfer extends OpMode{
                     shootPoseCount++;
                     telemetry.addLine("five" + opModeTimer.getElapsedTime());
                     setPathState(PathState.DONE);
-                    intake.setAllPower(0);
                 }
             default:
                 telemetry.addLine("Auto Finished" + opModeTimer.getElapsedTime());
@@ -248,6 +252,7 @@ public class AutoTransfer extends OpMode{
         pathTimer.resetTimer();
     }
 
+//INIT
     @Override
     public void init() {
         pathState = PathState.DRIVE_START_POS_SHOOT_POS;
@@ -263,6 +268,12 @@ public class AutoTransfer extends OpMode{
         intake = new Intake(hardwareMap, util.deviceConf);
         gate = new Gate(hardwareMap, util.deviceConf);
         hood = new Hood(hardwareMap, util.deviceConf, new Pose(64.5, 16.4, Math.toRadians(42.5)));
+        signal = new Signal(hardwareMap, util.deviceConf);
+        rail = new Rail(hardwareMap, util.deviceConf);
+        bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
+        middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
+        topSensor = new TopSensor(hardwareMap, util.deviceConf);
+
 
         turret.setBasketPos(Turret.redBasket);
 
@@ -270,6 +281,7 @@ public class AutoTransfer extends OpMode{
         follower.setPose(startPose);
     }
 
+//START
     public void start() {
         opModeTimer.resetTimer();
         setPathState(pathState);
@@ -278,25 +290,31 @@ public class AutoTransfer extends OpMode{
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
         time1.reset();
         shooter.setVelocity(1420);
+        ballCount = 3;
     }
 
+//LOOP
     @Override
     public void loop() {
-//AUTONOMOUS
-        follower.update();
-        //TODO: auto generate, to lazy to figure out why
-        try {
-            statePathUpdate();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
 
 //SUBSYSTEMS
+        ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
         shooter.update();
         turret.update();
         intake.update();
         gate.update();
         hood.update();
+        signal.update();
+        rail.update();
+        bottomSensor.update();
+        middleSensor.update();
+        topSensor.update();
+
+
+//AUTONOMOUS
+        statePathUpdate();
+        follower.update();
+
 
 //TELEMETRY
         telemetry.addData("path state", pathState.toString());
@@ -323,7 +341,9 @@ public class AutoTransfer extends OpMode{
 //            // Optionally, log or handle the interruption
 //        }
 //    }
-    public void Launch() throws InterruptedException {
+    public void Launch() {
+        stopLaunch = false;
+        gate.setPosition(Gate.OPEN);
         telemetry.addLine("Launching");
         launchCount++;
 //        if (shooter.getVelocity() < shooterTargetSpeed - Mortar.THRESH || shooter.getVelocity() > shooterTargetSpeed + Mortar.THRESH) {
@@ -340,7 +360,6 @@ public class AutoTransfer extends OpMode{
         //sleep(500);
         //kicker.setPosition(Kicker.DOWN);
 
-        wait(500);//TODO: if auto doesn't work delete wait statement and try again be warned about Gate closing to early
         telemetry.addLine("Launch");
         launchCount++;
         gate.setPosition(Gate.CLOSE);
@@ -349,5 +368,33 @@ public class AutoTransfer extends OpMode{
         launchIf++;
         stopLaunch = true;
         //intake.setIntakePower(1);
+    }
+    public void startIntake() {
+        if (stopLaunch) {
+            if (ballCount == 0) {
+                signal.setPosition(Signal.VIOLET);
+                    intake.setAllPower(1);
+
+            } else if (ballCount == 1) {
+                signal.setPosition(Signal.RED);
+                    intake.setAllPower(1);
+
+            } else if (ballCount == 2) {
+                signal.setPosition(Signal.YELLOW);
+                    intake.setRollerPower(0);
+                    intake.setIntakePower(1);
+
+            } else if (ballCount == 3) {
+                signal.setPosition(Signal.GREEN);
+                    intake.setAllPower(0);
+            }
+        }
+        else {
+            if (stopLaunch) {
+                intake.setAllPower(0); }
+            if (ballCount == 0) {
+                signal.setPosition(1);
+            }
+        }
     }
 }
