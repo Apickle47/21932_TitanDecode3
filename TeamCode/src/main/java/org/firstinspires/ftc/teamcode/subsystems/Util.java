@@ -33,5 +33,7 @@ public class Util {
         deviceConf.put("bottomSensor",      "bottomSensor");
         deviceConf.put("middleSensor",      "middleSensor");
         deviceConf.put("topSensor",         "topSensor");
+        deviceConf.put("tilt1",             "tilt1");
+        deviceConf.put("tilt2",             "tilt2");
     }
 }
