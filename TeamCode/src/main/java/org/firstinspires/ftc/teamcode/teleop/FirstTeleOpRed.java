@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MiddleSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Mortar;
 import org.firstinspires.ftc.teamcode.subsystems.Rail;
 import org.firstinspires.ftc.teamcode.subsystems.Signal;
+import org.firstinspires.ftc.teamcode.subsystems.Tilt;
 import org.firstinspires.ftc.teamcode.subsystems.TopSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Util;
@@ -64,6 +65,7 @@ public class FirstTeleOpRed extends LinearOpMode {
         Hood hood = new Hood(hardwareMap, util.deviceConf, new Pose(72, 72, (3*Math.PI)/2));
         Rail rail = new Rail(hardwareMap, util.deviceConf);
         Signal signal = new Signal(hardwareMap, util.deviceConf);
+        Tilt tilt = new Tilt(hardwareMap, util.deviceConf);
         Follower follower = Constants.createFollower(hardwareMap);
         ElapsedTime time1 = new ElapsedTime();
         ElapsedTime time2 = new ElapsedTime();
@@ -214,25 +216,25 @@ public class FirstTeleOpRed extends LinearOpMode {
 
 // DRIVE
             if(gamepad1.left_trigger>.1) {
-                drive.parkMode();
-//                follower.setTeleOpDrive(
-//                        -gamepad1.left_stick_y * .3,
-//                        -gamepad1.left_stick_x * .3,
-//                        -gamepad1.right_stick_x * .3,
-//                        true // Robot Centric
-//                );
+                //drive.parkMode();
+                follower.setTeleOpDrive(
+                        -gamepad1.left_stick_y * .3,
+                        -gamepad1.left_stick_x * .3,
+                        -gamepad1.right_stick_x * .3,
+                        true // Robot Centric
+                );
             }
 
-            if(gamepad1.left_trigger<=.1) {
-                drive.speedMode();
-//                follower.setTeleOpDrive(
-//                        -gamepad1.left_stick_y,
-//                        -gamepad1.left_stick_x,
-//                        -gamepad1.right_stick_x,
-//                        true // Robot Centric
-//                );
+            if(gamepad1.left_trigger<.1) {
+                //drive.speedMode();
+                follower.setTeleOpDrive(
+                        -gamepad1.left_stick_y,
+                        -gamepad1.left_stick_x,
+                        -gamepad1.right_stick_x,
+                        true // Robot Centric
+                );
             }
-            // TURRET
+// TURRET
             if(gamepad2.xWasPressed()) {
                 turretOverride = !turretOverride;
                 if(turretOverride) {
@@ -243,6 +245,13 @@ public class FirstTeleOpRed extends LinearOpMode {
 
             if (gamepad1.y && gamepad1.dpad_left) {
                 turret.resetRobotPose(resetPose);
+            }
+// TILT
+            if (gamepad1.xWasPressed()) {
+                tilt.tiltSetPower(1);
+            }
+            if (gamepad1.xWasReleased()) {
+                tilt.tiltSetPower(0);
             }
 
             /*HOOD
@@ -255,6 +264,9 @@ public class FirstTeleOpRed extends LinearOpMode {
             /*
             drive.update(gamepad1.left_stick_x, -gamepad1.left_stick_y, -gamepad1.right_stick_x);
             */
+
+
+
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
             intake.update();
             turret.update();

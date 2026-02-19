@@ -28,6 +28,6 @@ public class Tilt {
 
     public void update() {
         tilt1.setPower(power);
-        tilt2.setPower(-power);
+        tilt2.setPower(power);
     }
 }
