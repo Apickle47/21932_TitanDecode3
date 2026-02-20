@@ -36,7 +36,7 @@ public class Turret {
     private Pose pose;
 
     public static Pose blueBasket = new Pose(0,140);
-    public static Pose redBasket = new Pose(150, 135);
+    public static Pose redBasket = new Pose(140, 144);
     public static Pose curBasket;
 
     public static double angleOffset = 0;

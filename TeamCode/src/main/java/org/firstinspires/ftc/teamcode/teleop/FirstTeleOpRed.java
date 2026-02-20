@@ -40,7 +40,7 @@ public class FirstTeleOpRed extends LinearOpMode {
     //SENSOR
     public static int sensorThresh = 20, brightness = 50;
     //
-    public static boolean indexing;
+    public static boolean indexing, tilting;
     public static double reverseIntakeSpeed = -.75;
     public static int maxTurretChange = 10;
     public static int kickerWaitTime = 500;
@@ -67,8 +67,6 @@ public class FirstTeleOpRed extends LinearOpMode {
         Signal signal = new Signal(hardwareMap, util.deviceConf);
         Tilt tilt = new Tilt(hardwareMap, util.deviceConf);
         Follower follower = Constants.createFollower(hardwareMap);
-        ElapsedTime time1 = new ElapsedTime();
-        ElapsedTime time2 = new ElapsedTime();
         Pose pose;
         follower.setStartingPose(new Pose(72, 72, Math.toRadians(270)));
         follower.update();
@@ -216,23 +214,11 @@ public class FirstTeleOpRed extends LinearOpMode {
 
 // DRIVE
             if(gamepad1.left_trigger>.1) {
-                //drive.parkMode();
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y * .3,
-                        -gamepad1.left_stick_x * .3,
-                        -gamepad1.right_stick_x * .3,
-                        true // Robot Centric
-                );
+                drive.parkMode();
             }
 
             if(gamepad1.left_trigger<.1) {
-                //drive.speedMode();
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x,
-                        true // Robot Centric
-                );
+                drive.speedMode();
             }
 // TURRET
             if(gamepad2.xWasPressed()) {
@@ -248,9 +234,15 @@ public class FirstTeleOpRed extends LinearOpMode {
             }
 // TILT
             if (gamepad1.xWasPressed()) {
-                tilt.tiltSetPower(1);
+                tilting = true;
             }
             if (gamepad1.xWasReleased()) {
+                tilting = false;
+            }
+            if (tilting) {
+                tilt.tiltSetPower(1);
+            }
+            if (!tilting) {
                 tilt.tiltSetPower(0);
             }
 
@@ -267,7 +259,8 @@ public class FirstTeleOpRed extends LinearOpMode {
 
 
 
-            follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            //follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+            drive.update(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
             intake.update();
             turret.update();
             shooter.update();
