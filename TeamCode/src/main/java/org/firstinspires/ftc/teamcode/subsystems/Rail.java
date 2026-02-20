@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class Rail {
     private Servo rail;
 
-    public static double INLINE = 0.06, INDEX = 0.80;
+    public static double INLINE = .28, INDEX = 1;
     private double position = INLINE;
 
     public Rail(HardwareMap hardwareMap, HashMap<String, String> config) {
