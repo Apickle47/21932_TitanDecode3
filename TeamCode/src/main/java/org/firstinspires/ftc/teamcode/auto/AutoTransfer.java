@@ -80,15 +80,16 @@ public class AutoTransfer extends OpMode{
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(113.93684210526318,129.4315789473684, Math.toRadians(42.5));
+    private final Pose startPose = new Pose(126.66,129.71, .6879);
     private final Pose shootPose = new Pose(93.64210526315794,83.49473684210525, Math.toRadians(0));
     private final Pose spike1 = new Pose(130, 84, Math.toRadians(0));
     private final Pose setUp2 = new Pose(96.25263157894737, 59.284210526315775, Math.toRadians(0));
-    private final Pose spike2 = new Pose(135,59,Math.toRadians(0));
+    private final Pose spike2 = new Pose(130,59,Math.toRadians(0));
     private final Pose setUp3 = new Pose(96.25263157894737,35.368421052631575, Math.toRadians(0));
-    private final Pose spike3 = new Pose(135, 35, Math.toRadians(0));
-    private final Pose setUpH = new Pose(135, 52, Math.toRadians(270));
-    private final Pose humanPose = new Pose(135,7, Math.toRadians(270));
+    private final Pose spike3 = new Pose(130, 35, Math.toRadians(0));
+    private final Pose setUpH = new Pose(130, 52, Math.toRadians(270));
+    private final Pose humanPose = new Pose(130,7, Math.toRadians(270));
+    private final Pose gintake = new Pose(137.11, 61.29, .6799);
 
     private PathChain driveStartPosShootPos;
 
@@ -287,6 +288,7 @@ public class AutoTransfer extends OpMode{
         setPathState(pathState);
         Turret.tracking = true;
         hood.setHoodPosition(Hood.closeHood);
+        rail.setPosition(Rail.INDEX);
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
         time1.reset();
         shooter.setVelocity(1420);
