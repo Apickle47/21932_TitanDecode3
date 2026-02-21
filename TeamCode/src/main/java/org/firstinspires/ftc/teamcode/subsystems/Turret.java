@@ -27,7 +27,7 @@ public class Turret {
     private double rotationLimit = Math.PI * 208;
 
     public static double rotationSpeed = 1, maxRange = Math.toRadians(355) * 108/96;
-    private double x, y, heading, turretHeading, turretHeadingRelative;
+    public static double x, y, heading, turretHeading, turretHeadingRelative;
 
     public static boolean tracking = false;
 
@@ -35,8 +35,8 @@ public class Turret {
 
     private Pose pose;
 
-    public static Pose blueBasket = new Pose(0,140);
-    public static Pose redBasket = new Pose(140, 144);
+    public static Pose blueBasket = new Pose(0,144);
+    public static Pose redBasket = new Pose(144, 144);
     public static Pose curBasket;
 
     public static double angleOffset = 0;

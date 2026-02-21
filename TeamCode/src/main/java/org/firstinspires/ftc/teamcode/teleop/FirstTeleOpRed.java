@@ -79,7 +79,7 @@ public class FirstTeleOpRed extends LinearOpMode {
         waitForStart();
 
         follower.startTeleOpDrive(true);
-        hood.setHoodPosition(0.7);
+        hood.setHoodPosition(0.6);
         rail.setPosition(Rail.INLINE);
         boolean shooting = false, turretOverride = false, intaking = false, metDistanceSensorThresh = false, keepShooterRunning = true, preshoot = false, manualKicker = false;
         int shooterTargetSpeed = 0;

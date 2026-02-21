@@ -15,9 +15,9 @@ public class Mortar {
 
     private double power, vel;
 
-    public static double THRESH = 25;
+    public static double THRESH = 20;
     public static double OFF = 0, MAX = 1, NORMAL = 0.6, WAIT = 1400;
-    public static double slope = 5.9343, closeB = 1015, farB = 1185;
+    public static double slope = 5.9343, closeB = 965, farB = 1085;
     public static double p = 200, i = 0, d = 0, f = 13;
 
 
@@ -62,6 +62,7 @@ public class Mortar {
         return vel;
     }
 
+    public boolean safeToShoot(int target) { return (getVelocity() > target - Mortar.THRESH && getVelocity() < target + Mortar.THRESH && getVelocity() <= target); }
     public double getPower() {
         return power;
     }
