@@ -65,6 +65,10 @@ public class RedTeleOp extends LinearOpMode {
         Pose pose;
         follower.setStartingPose(new Pose(72, 72, Math.toRadians(270)));
         follower.update();
+        ElapsedTime myStopwatch = new ElapsedTime();
+        double time = 0;
+        double liftTime = 6;
+
         TelemetryManager telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         turret.setBasketPos(Turret.redBasket);
@@ -88,6 +92,7 @@ public class RedTeleOp extends LinearOpMode {
         int[] powers = {-1, 0, 1};
         int count = 1;
         int incCount = 0;
+        String topColor = "UNKNOWN";
         double[] intakeLightSequence = {1.0, 0.29, 0.35, 0.62};
         double[] StorageLightSequence = {1.0, 0.71, 0.5};
         double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
@@ -101,6 +106,7 @@ public class RedTeleOp extends LinearOpMode {
             //Constant update variables
             ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
             pose = turret.getPose();
+            topColor = topSensor.getColor();
             hood.hoodIncrement(0.05 * incCount, goalDist >= 115 ? Hood.closeHood : Hood.farHood);
             goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
             shooterTargetVel = shooter.calcVelocity(goalDist);
@@ -134,14 +140,17 @@ public class RedTeleOp extends LinearOpMode {
                 turret.resetRobotPose(resetPose);
             }
             // Slow Mode
-            if (gamepad1.left_trigger > 0) {
+            if (gamepad1.left_trigger > 0.1) {
                 driveSpeed = 0.4;
+            }
+            else {
+                driveSpeed = 1;
             }
             // Intake Eject
             if (gamepad2.yWasPressed()) { abState = 2; }
             if (gamepad2.yWasReleased()) { abState = 0; }
             // Preshoot
-            if (gamepad2.bWasPressed()) { abState = 3; }
+            if (gamepad2.bWasPressed()) { arState = 3; }
             // Shooter Speed Override
             if (gamepad1.dpadLeftWasPressed()) {
                 Mortar.closeB -= 50;
@@ -181,7 +190,14 @@ public class RedTeleOp extends LinearOpMode {
                     break;
 
                 case(2):
+                    actSeq = 2;
+                    shooter.setVelocity(0);
+                    abState = 3;
                     tilt.tiltSetPower(servoPower);
+                    break;
+                case(3):
+                    Turret.tracking = true;
+                    shooter.setVelocity(shooterTargetVel);
                     break;
                 default:
                     arState = 0;
@@ -190,9 +206,11 @@ public class RedTeleOp extends LinearOpMode {
             //Abhay States
             switch (abState) {
                 case(0): //Intake Off
+                    actSeq = 1;
                     intake.setAllPower(0);
                     break;
                 case(1): //Intake On
+                    actSeq = 0;
                     intake.setAllPower(1);
                     if (ballCount >= 2) {
                         intake.setAllPower(0);
@@ -200,19 +218,47 @@ public class RedTeleOp extends LinearOpMode {
                     }
                     break;
                 case(2):
+                    actSeq = 1;
                     intake.setAllPower(-0.75);
                     break;
-                case(3):
-                    Turret.tracking = true;
-                    shooter.setVelocity(shooterTargetVel);
-
+                case(3): //Tilt
+                    intake.setAllPower(0);
+                    break;
+                default:
+                    abState = 0;
             }
             //Light States
             switch(actSeq) {
                 case(0):
                     signal.setPosition(lightSequences[0][ballCount]);
+                    break;
                 case(1):
-
+                    switch(topColor) {
+                        case("UNKNOWN"):
+                            signal.setPosition(0.41);
+                            break;
+                        case("GREEN"):
+                            signal.setPosition(0.52);
+                            break;
+                        case("PURPLE"):
+                            signal.setPosition(0.7);
+                            break;
+                        default:
+                            topColor="UNKNOWN";
+                        }
+                    break;
+                case(2):
+                    signal.setPosition(0.62);
+                    signal.setPosition(myStopwatch.time() >= 1 && signal.getLEDColor() == 0.62 && time < liftTime ? 0.3 : 0.62);
+                    if (myStopwatch.time() >= 1 || time >= liftTime) {
+                        time += myStopwatch.time();
+                        myStopwatch.reset();
+                    }
+                    if (time >= liftTime)
+                        signal.setPosition(0.52);
+                    break;
+                default:
+                    actSeq=1;
             }
 
 
