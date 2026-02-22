@@ -22,8 +22,8 @@ public class Util {
         //deviceConf.put("kicker",            "kicker");//
         //deviceConf.put("turretMotor",       "turret");
         deviceConf.put("webcam1",           "camera");
-        deviceConf.put("shooter",           "flyMotor");//
-        deviceConf.put("shooterTwo",        "flyMotor2");//
+        deviceConf.put("flyMotor",           "flyMotor");//
+        deviceConf.put("flyMotor2",        "flyMotor2");//
         deviceConf.put("gate",              "gate");//
         deviceConf.put("rail",              "rail");
         deviceConf.put("turret",            "turret");//

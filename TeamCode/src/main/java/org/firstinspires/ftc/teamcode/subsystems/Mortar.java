@@ -23,12 +23,12 @@ public class Mortar {
 
 
     public Mortar(HardwareMap hardwareMap, HashMap<String, String> config) {
-        flyMotor = hardwareMap.get(DcMotorEx.class, config.get("shooter"));
+        flyMotor = hardwareMap.get(DcMotorEx.class, "flyMotor");
         flyMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         flyMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(p, i, d, f));
         flyMotor.setDirection(Direction.REVERSE);
 
-        flyMotor2 = hardwareMap.get(DcMotorEx.class, config.get("shooterTwo"));
+        flyMotor2 = hardwareMap.get(DcMotorEx.class, "flyMotor2");
         flyMotor2.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         flyMotor2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(p, i, d, f));
         flyMotor2.setDirection(Direction.REVERSE);
