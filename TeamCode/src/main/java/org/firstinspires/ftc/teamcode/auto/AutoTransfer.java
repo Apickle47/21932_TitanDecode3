@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.auto;
 
 
-import com.google.gson.Gson;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -52,32 +51,30 @@ public class AutoTransfer extends OpMode{
     private int shooterTargetSpeed;
     private int launchCount, shootPoseCount, launchIf;
     private double target;
-
+    private double[] times;
+    private int count;
     ElapsedTime time1 = new ElapsedTime();
 
 
     public enum PathState {
-        DRIVE_START_POS_SHOOT_POS, SHOOT_PRELOAD, SPIKE_ONE, RETURN_SHOOT1, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, DONE
+        DRIVE_START_POS_SHOOT_POS, SHOOT_PRELOAD, SPIKE_ONE, RETURN_SHOOT1, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_SETUP, GINTAKE, RETURN_SHOOT_GINTAKE, DONE, IDLE
     }
 
     PathState pathState;
 
     private final Pose startPose = new Pose(126.66,129.71, .6879);
     private final Pose shootPose = new Pose(88.7,83.7836, 0);
-    private final Pose spike1 = new Pose(128, 87, Math.toRadians(0));
+    private final Pose spike1 = new Pose(120, 85, Math.toRadians(0));
     private final Pose setUp2 = new Pose(96.25263157894737, 59.284210526315775, Math.toRadians(0));
-    private final Pose spike2 = new Pose(128,59,Math.toRadians(0));
+    private final Pose spike2 = new Pose(126,59,Math.toRadians(0));
     private final Pose setUp3 = new Pose(96.25263157894737,35.368421052631575, Math.toRadians(0));
     private final Pose spike3 = new Pose(128, 35, Math.toRadians(0));
     private final Pose setUpH = new Pose(128, 52, Math.toRadians(270));
     private final Pose humanPose = new Pose(130,7, Math.toRadians(270));
-    private final Pose gintake = new Pose(137.11, 61.29, .6799);
+    private final Pose gintakePose1 = new Pose(135.705, 60.335, .343075);
+    private final Pose gintakePose2 = new Pose(140, 58.422, .914129);
 
-    private PathChain driveStartPosShootPos;
-
-    private PathChain spikeOne, spikeTwo, spikeThree;
-    private PathChain returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman;
-
+    private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman, gintakeSetUp, gintake, returnToShootGintake;
 
     public void buildPaths() {
         // put in coordinates for starting pose > ending pose
@@ -130,6 +127,18 @@ public class AutoTransfer extends OpMode{
                 .addPath(new BezierLine(humanPose, shootPose))
                 .setLinearHeadingInterpolation(humanPose.getHeading(), shootPose.getHeading())
                 .build();
+        gintakeSetUp = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, gintakePose1))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), gintakePose1.getHeading())
+                .build();
+        gintake = follower.pathBuilder()
+                .addPath(new BezierLine(gintakePose1, gintakePose2))
+                .setLinearHeadingInterpolation(gintakePose1.getHeading(), gintakePose2.getHeading())
+                .build();
+        returnToShootGintake = follower.pathBuilder()
+                .addPath(new BezierLine(gintakePose2, shootPose))
+                .setLinearHeadingInterpolation(gintakePose2.getHeading(), shootPose.getHeading())
+                .build();
 
     }
 
@@ -146,9 +155,9 @@ public class AutoTransfer extends OpMode{
                     gate.setPosition(Gate.OPEN);
                     intake.setAllPower(1);
                 }
-                if (pathTimer.getElapsedTimeSeconds() > 3.3) {
-                    shooting = false;
+                if (pathTimer.getElapsedTimeSeconds() > 3.0) {
                     gate.setPosition(Gate.CLOSE);
+                    shooting = false;
                 }
                 if (!follower.isBusy() && !shooting) {
                     follower.followPath(spikeOne, true);
@@ -158,20 +167,20 @@ public class AutoTransfer extends OpMode{
                 break;
             case SPIKE_ONE:
                 if (!follower.isBusy()) {
+                    intake.setAllPower(0);
                     follower.followPath(returnToShoot1, true);
                     setPathState(PathState.RETURN_SHOOT1);
                 }
                 break;
             case RETURN_SHOOT1:
                 if (!follower.isBusy()) {
-                    if (!follower.isBusy()) {
-                        shooting = true;
-                        gate.setPosition(Gate.OPEN);
-                        intake.setAllPower(1);
-                    }
-                    if (pathTimer.getElapsedTimeSeconds() > 3.5) {//TODO: TUNE THE TIME
-                        shooting = false;
+                    shooting = true;
+                    gate.setPosition(Gate.OPEN);
+                    intake.setAllPower(1);
+
+                    if (pathTimer.getElapsedTimeSeconds() > 3.0) {//TODO: TUNE THE TIME
                         gate.setPosition(Gate.CLOSE);
+                        shooting = false;
                     }
                     if (!follower.isBusy() && !shooting) {
                         follower.followPath(setUpTwo, true);
@@ -187,26 +196,64 @@ public class AutoTransfer extends OpMode{
                 }
             case SPIKE_TWO:
                 if (!follower.isBusy()) {
+                    intake.setAllPower(0);
                     follower.followPath(returnToShoot2, true);
                     setPathState(PathState.RETURN_SHOOT2);
                 }
             case RETURN_SHOOT2:
                 if (!follower.isBusy()) {
-                    if (!follower.isBusy()) {
-                        shooting = true;
-                        gate.setPosition(Gate.OPEN);
-                        intake.setAllPower(1);
-                    }
-                    if (pathTimer.getElapsedTimeSeconds() > 6) {//TODO: TUNE THE TIME
-                        shooting = false;
+                    shooting = true;
+                    gate.setPosition(Gate.OPEN);
+                    intake.setAllPower(1);
+
+                    if (pathTimer.getElapsedTimeSeconds() > 3.0) {//TODO: TUNE THE TIME
                         gate.setPosition(Gate.CLOSE);
+                        shooting = false;
                     }
                     if (!follower.isBusy() && !shooting) {
-                        follower.followPath(setUpThree, true);
-                        setPathState(PathState.SET_UP3);
+                        follower.followPath(gintakeSetUp, true);
+                        startIntake();
+                        setPathState(PathState.GINTAKE_SETUP);
                     }
                 }
                 break;
+            case GINTAKE_SETUP:
+                gate.setPosition(Gate.CLOSE);
+                if (!follower.isBusy()) {
+                    follower.followPath(gintake, true);
+                    setPathState(PathState.GINTAKE);
+                }
+            case GINTAKE:
+                if (!follower.isBusy()) {
+                    setPathState(PathState.IDLE);
+                }
+            case IDLE:
+                if (opModeTimer.getElapsedTimeSeconds() > times[count]){
+                    follower.followPath(returnToShootGintake, true);
+                    intake.setAllPower(0);
+                    count++;
+                    setPathState(PathState.RETURN_SHOOT_GINTAKE);
+                }
+
+                break;
+            case RETURN_SHOOT_GINTAKE:
+                gate.setPosition(Gate.CLOSE);
+                if (!follower.isBusy()) {
+                    shooting = true;
+                    gate.setPosition(Gate.OPEN);
+                    intake.setAllPower(1);
+                }
+                if (pathTimer.getElapsedTimeSeconds() > 2.8) {//TODO: TUNE THE TIME
+                    gate.setPosition(Gate.CLOSE);
+                    shooting = false;
+                }
+                if (!follower.isBusy() && !shooting) {
+                    follower.followPath(gintakeSetUp, true);
+                    startIntake();
+                    setPathState(PathState.GINTAKE_SETUP);
+                }
+
+                /*
             case SET_UP3:
                 if (!follower.isBusy()) {
                     follower.followPath(spikeThree, true);
@@ -244,6 +291,7 @@ public class AutoTransfer extends OpMode{
                     telemetry.addLine("five" + opModeTimer.getElapsedTime());
                     setPathState(PathState.DONE);
                 }
+                */
             default:
                 telemetry.addLine("Auto Finished" + opModeTimer.getElapsedTime());
                 shooter.setFlyMotorPower(0);
@@ -279,6 +327,8 @@ public class AutoTransfer extends OpMode{
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
 
+        times = new double[]{16.5, 22.5, 26.5};
+        count = 0;
 
         turret.setBasketPos(Turret.redBasket);
 
@@ -292,10 +342,10 @@ public class AutoTransfer extends OpMode{
         setPathState(pathState);
         Turret.tracking = true;
         hood.setHoodPosition(Hood.closeHood);
-        rail.setPosition(Rail.INLINE);
+        rail.setPosition(Rail.INDEX);
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
         time1.reset();
-        shooter.setVelocity(1420);
+        shooter.setVelocity(1400);
         ballCount = 3;
     }
 
@@ -353,29 +403,38 @@ public class AutoTransfer extends OpMode{
         intake.setAllPower(1);
     }
     public void startIntake() {
+        gate.setPosition(Gate.CLOSE);
         if (!shooting) {
             if (ballCount == 0) {
                 signal.setPosition(Signal.VIOLET);
-                    intake.setAllPower(1);
+                gate.setPosition(Gate.CLOSE);
+                intake.setAllPower(1);
 
             } else if (ballCount == 1) {
                 signal.setPosition(Signal.RED);
-                    intake.setAllPower(1);
+                gate.setPosition(Gate.CLOSE);
+                intake.setAllPower(1);
 
             } else if (ballCount == 2) {
                 signal.setPosition(Signal.YELLOW);
-                    intake.setRollerPower(0);
-                    intake.setIntakePower(1);
+                gate.setPosition(Gate.CLOSE);
+                intake.setRollerPower(0);
+                intake.setIntakePower(1);
 
             } else if (ballCount == 3) {
                 signal.setPosition(Signal.GREEN);
-                    intake.setAllPower(0);
+                gate.setPosition(Gate.CLOSE);
+                intake.setAllPower(0);
             }
         }
         else {
+            gate.setPosition(Gate.CLOSE);
             if (!shooting) {
-                intake.setAllPower(0); }
+                gate.setPosition(Gate.CLOSE);
+                intake.setAllPower(0);
+            }
             if (ballCount == 0) {
+                gate.setPosition(Gate.CLOSE);
                 signal.setPosition(1);
             }
         }

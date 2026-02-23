@@ -92,7 +92,7 @@ public class RedTeleOp extends LinearOpMode {
         int[] powers = {-1, 0, 1};
         int count = 1;
         int incCount = 0;
-        String topColor = "UNKNOWN";
+        int topColor = topSensor.hasBall();
         double[] intakeLightSequence = {1.0, 0.29, 0.35, 0.62};
         double[] StorageLightSequence = {1.0, 0.71, 0.5};
         double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
@@ -106,7 +106,7 @@ public class RedTeleOp extends LinearOpMode {
             //Constant update variables
             ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
             pose = turret.getPose();
-            topColor = topSensor.getColor();
+            topColor = topSensor.hasBall();
             hood.hoodIncrement(0.05 * incCount, goalDist >= 115 ? Hood.closeHood : Hood.farHood);
             goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
             shooterTargetVel = shooter.calcVelocity(goalDist);
@@ -212,9 +212,11 @@ public class RedTeleOp extends LinearOpMode {
                 case(1): //Intake On
                     actSeq = 0;
                     intake.setAllPower(1);
-                    if (ballCount >= 2) {
-                        intake.setAllPower(0);
-                        intake.setIntakePower(0.75);
+                    if (ballCount >= 2 && arState != 1) {
+                        intake.setRollerPower(0);
+                    }
+                    if (ballCount >= 3 && arState != 1) {
+                        abState = 0;
                     }
                     break;
                 case(2):
@@ -234,22 +236,20 @@ public class RedTeleOp extends LinearOpMode {
                     break;
                 case(1):
                     switch(topColor) {
-                        case("UNKNOWN"):
+                        case(0):
                             signal.setPosition(0.41);
                             break;
-                        case("GREEN"):
-                            signal.setPosition(0.52);
-                            break;
-                        case("PURPLE"):
-                            signal.setPosition(0.7);
+                        case(1):
+                            if (topSensor.getColor() == "GREEN"){ signal.setPosition(0.52); }
+                            else {signal.setPosition(0.7);}
                             break;
                         default:
-                            topColor="UNKNOWN";
+                            topColor=0;
                         }
                     break;
                 case(2):
                     signal.setPosition(0.62);
-                    signal.setPosition(myStopwatch.time() >= 1 && signal.getLEDColor() == 0.62 && time < liftTime ? 0.3 : 0.62);
+                    signal.setPosition(myStopwatch.time() >= 0.5 && signal.getLEDColor() == 0.62 && time < liftTime ? 0.28 : 0.62);
                     if (myStopwatch.time() >= 1 || time >= liftTime) {
                         time += myStopwatch.time();
                         myStopwatch.reset();
@@ -268,7 +268,7 @@ public class RedTeleOp extends LinearOpMode {
 
 
             //  ---  UPDATES ---
-            drive.update(-gamepad1.left_stick_y * driveSpeed, -gamepad1.left_stick_x * driveSpeed, -gamepad1.right_stick_x * driveSpeed);
+            drive.update(-gamepad1.left_stick_x * driveSpeed, -gamepad1.left_stick_y * driveSpeed, -gamepad1.right_stick_x * driveSpeed);
             intake.update();
             turret.update();
             shooter.update();
@@ -280,6 +280,72 @@ public class RedTeleOp extends LinearOpMode {
             topSensor.update();
             follower.update();
 
+
+
+            //Telemetry
+            telemetryM.addLine("SHOOTER:");
+            telemetryM.addData("Shooter vel", shooter.getVelocity());
+            telemetryM.addData("Shooter target vel", shooter.getTargetVelocity());
+            telemetryM.addData("Keep Shooter Running", keepShooterRunning);
+            telemetryM.addData("Preshoot", preshoot);
+            telemetryM.addData("closeB", Mortar.closeB);
+            telemetryM.addData("farB", Mortar.farB);
+            telemetryM.addLine("");
+            telemetryM.addLine("POSE:");
+            telemetryM.addData("pose x", pose.getX());
+            telemetryM.addData("pose y", pose.getY());
+            telemetryM.addData("pose heading", Math.toDegrees(pose.getHeading()));
+            telemetryM.addLine("");
+            telemetryM.addLine("TURRET:");
+            telemetryM.addData("Turret Heading relative", turret.getTurretHeadingRelative());
+            telemetryM.addData("Turret target", turret.getTurretHeading());
+            telemetryM.addData("Turret Manual Override", turretOverride);
+            telemetryM.addLine("");
+            telemetryM.addLine("MISC:");
+            telemetryM.addData("Ball Count", ballCount);
+            telemetryM.addData("hood angle", hood.getHoodPosition());
+            telemetryM.addData("LED Color", signal.getLEDColor());
+            telemetryM.addData("Rail Position", rail.getPosition());
+            telemetryM.addData("Intaking?", intaking);
+            telemetryM.addLine("");
+            telemetryM.addLine("COLOR SENSOR");
+            telemetryM.addData("Bottom Sensor Color", bottomSensor.getColor());
+            telemetryM.addData("Middle Sensor Color", middleSensor.getColor());
+            telemetryM.addData("Top Sensor Color", topSensor.getColor());
+
+
+            telemetry.addLine("SHOOTER:");
+            telemetry.addData("Shooter vel", shooter.getVelocity());
+            telemetry.addData("Shooter target vel", shooter.getTargetVelocity());
+            telemetry.addData("Keep Shooter Running", keepShooterRunning);
+            telemetry.addData("Preshoot", preshoot);
+            telemetry.addData("closeB", Mortar.closeB);
+            telemetry.addData("farB", Mortar.farB);
+            telemetry.addLine("");
+            telemetry.addLine("POSE:");
+            telemetry.addData("pose x", pose.getX());
+            telemetry.addData("pose y", pose.getY());
+            telemetry.addData("pose heading", Math.toDegrees(pose.getHeading()));
+            telemetry.addLine("");
+            telemetry.addLine("TURRET:");
+            telemetry.addData("Turret Heading relative", turret.getTurretHeadingRelative());
+            telemetry.addData("Turret target", turret.getTurretHeading());
+            telemetry.addData("Turret Manual Override", turretOverride);
+            telemetry.addLine("");
+            telemetry.addLine("MISC:");
+            telemetry.addData("Ball Count", ballCount);
+            telemetry.addData("hood angle", hood.getHoodPosition());
+            telemetry.addData("LED Color", signal.getLEDColor());
+            telemetry.addData("Rail Position", rail.getPosition());
+            telemetry.addData("Intaking?", intaking);
+            telemetry.addLine("");
+            telemetry.addLine("COLOR SENSOR");
+            telemetry.addData("Bottom Sensor Color", bottomSensor.getColor());
+            telemetry.addData("Middle Sensor Color", middleSensor.getColor());
+            telemetry.addData("Top Sensor Color", topSensor.getColor());
+
+            telemetryM.update();
+            telemetry.update();
 
         }
     }

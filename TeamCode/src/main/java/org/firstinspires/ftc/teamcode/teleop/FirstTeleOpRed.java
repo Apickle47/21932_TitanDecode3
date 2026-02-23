@@ -260,7 +260,7 @@ public class FirstTeleOpRed extends LinearOpMode {
 
 
             //follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
-            drive.update(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+            drive.update(-gamepad1.left_stick_x, -gamepad1.left_stick_y , -gamepad1.right_stick_x);
             intake.update();
             turret.update();
             shooter.update();
