@@ -135,6 +135,7 @@ public class NewRedTeleOp extends OpMode {
             }
             else {
                 arState = 1;
+                abState = 0;
             }
         }
         // Intake
@@ -205,6 +206,7 @@ public class NewRedTeleOp extends OpMode {
                     intake.setAllPower(1);
                     abState = 1;
                 }
+
                 break;
 
             case(2):

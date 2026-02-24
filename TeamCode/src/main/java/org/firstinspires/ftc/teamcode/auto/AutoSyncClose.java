@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Util;
 
 @Autonomous
-public class AutoTransfer extends OpMode{
+public class AutoSyncClose extends OpMode{
 
 
     private Follower follower;
@@ -73,6 +73,9 @@ public class AutoTransfer extends OpMode{
     private final Pose humanPose = new Pose(130,7, Math.toRadians(270));
     private final Pose gintakeAwayPose1 = new Pose(121.705, 58.694, .0454);
     private final Pose gintakePose = new Pose(137.432, 61.0279, 0.4873);
+    private final Pose hitGate = new Pose(134.105, 82.3867, 1.511);
+    private final Pose hitGateRev = new Pose(134.105, 82.3867, -1.511);
+
 
     private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman, gintakeAway, gintake, returnToShootGintake;
 
@@ -86,10 +89,13 @@ public class AutoTransfer extends OpMode{
         spikeOne = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, spike1))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), spike1.getHeading())
+                .addPath(new BezierLine(spike1, hitGate))
+                .setLinearHeadingInterpolation(spike2.getHeading(), hitGate.getHeading())
                 .build();
+
         returnToShoot1 = follower.pathBuilder()
-                .addPath(new BezierLine(spike1, shootPose))
-                .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(hitGate, shootPose))
+                .setLinearHeadingInterpolation(hitGate.getHeading(), shootPose.getHeading())
                 .build();
         setUpTwo = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUp2))
@@ -98,10 +104,12 @@ public class AutoTransfer extends OpMode{
         spikeTwo = follower.pathBuilder()
                 .addPath(new BezierLine(setUp2,spike2))
                 .setLinearHeadingInterpolation(setUp2.getHeading(), spike2.getHeading())
+                .addPath(new BezierLine(spike2, hitGateRev))
+                .setLinearHeadingInterpolation(spike2.getHeading(), hitGateRev.getHeading())
                 .build();
         returnToShoot2 = follower.pathBuilder()
-                .addPath(new BezierLine(spike2, shootPose))
-                .setLinearHeadingInterpolation(spike2.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(hitGateRev, shootPose))
+                .setLinearHeadingInterpolation(hitGateRev.getHeading(), shootPose.getHeading())
                 .build();
         setUpThree = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUp3))
@@ -306,7 +314,7 @@ public class AutoTransfer extends OpMode{
         pathTimer.resetTimer();
     }
 
-//INIT
+    //INIT
     @Override
     public void init() {
         pathState = PathState.DRIVE_START_POS_SHOOT_POS;
@@ -328,7 +336,7 @@ public class AutoTransfer extends OpMode{
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
 
-        times = new double[]{15.5, 22.5, 30};
+        times = new double[]{12.5, 18.5, 30};
         count = 0;
 
         turret.setBasketPos(Turret.redBasket);
@@ -337,7 +345,7 @@ public class AutoTransfer extends OpMode{
         follower.setPose(startPose);
     }
 
-//START
+    //START
     public void start() {
         opModeTimer.resetTimer();
         setPathState(pathState);
@@ -350,7 +358,7 @@ public class AutoTransfer extends OpMode{
         ballCount = 3;
     }
 
-//LOOP
+    //LOOP
     @Override
     public void loop() {
 //AUTONOMOUS
@@ -377,15 +385,13 @@ public class AutoTransfer extends OpMode{
         telemetry.addData("heading", follower.getPose().getHeading());
         telemetry.addData("Gate Position", gate.getPosition());
         telemetry.addData("Path time", pathTimer.getElapsedTimeSeconds());
-        telemetry.addData("Target Speed", shooter.getTargetVelocity());
-        telemetry.addData("Flywheel Velocity", shooter.getVelocity());
-        telemetry.addData("Hood Position", hood.getHoodPosition());
-        
+        telemetry.addData("opModeTimer", opModeTimer.getElapsedTimeSeconds());
+
         telemetry.update();
     }
 
 
-//    public void sleep(int t) {
+    //    public void sleep(int t) {
 //        try {
 //            Thread.sleep(t); // Wait for 1 millisecond
 //        } catch (InterruptedException e) {
