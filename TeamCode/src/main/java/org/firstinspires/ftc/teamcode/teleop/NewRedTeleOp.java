@@ -35,7 +35,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import java.util.Objects;
 
 @Configurable
-@TeleOp(name = "RedTeleOpNew")
+@TeleOp(name = "RedTeleOp")
 public class NewRedTeleOp extends OpMode {
 
     public static Pose resetPose = new Pose(72,72,Math.toRadians(270) );
@@ -122,7 +122,7 @@ public class NewRedTeleOp extends OpMode {
         pose = turret.getPose();
         topColor = topSensor.hasBall();
         goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
-        hood.hoodIncrement(0.05 * incCount, Hood.closeHood);
+        hood.hoodIncrement(0.05 * incCount, goalDist > 115 ? Hood.farHood : Hood.closeHood);
         shooterTargetVel = shooter.calcVelocity(goalDist);
 
 
@@ -151,7 +151,7 @@ public class NewRedTeleOp extends OpMode {
             arState = 2;
         }
         // Reset Position
-        if (gamepad1.y && gamepad1.dpad_left) {
+        if (gamepad1.y && gamepad1.leftBumperWasPressed()) {
             turret.resetRobotPose(resetPose);
         }
         // Slow Mode
@@ -165,7 +165,7 @@ public class NewRedTeleOp extends OpMode {
         if (gamepad2.yWasPressed()) { abState = 2; }
         if (gamepad2.yWasReleased()) { abState = 0; }
         // Preshoot
-        if (gamepad2.bWasPressed()) { arState = 3; }
+        if (gamepad2.bWasPressed()) { if (arState != 1) { arState = 3; } }
         // Shooter Speed Override
         if (gamepad1.dpadLeftWasPressed()) {
             Mortar.closeB -= 50;
@@ -185,6 +185,13 @@ public class NewRedTeleOp extends OpMode {
         // Turret Manual Override
         if (gamepad2.xWasPressed()) {
             turretOverride = !turretOverride;
+        }
+        // Turret Angle Offset
+        if (gamepad2.dpadLeftWasPressed()) {
+            turret.setAngleOffset(2);
+        }
+        if (gamepad2.dpadRightWasPressed()) {
+            turret.setAngleOffset(-2);
         }
 
 
@@ -324,6 +331,7 @@ public class NewRedTeleOp extends OpMode {
         telemetryM.addData("Turret Heading relative", turret.getTurretHeadingRelative());
         telemetryM.addData("Turret target", turret.getTurretHeading());
         telemetryM.addData("Turret Manual Override", turretOverride);
+        telemetryM.addData("Turret Angle Offset", Turret.angleOffset);
         telemetryM.addLine("");
         telemetryM.addLine("MISC:");
         telemetryM.addData("Ball Count", ballCount);

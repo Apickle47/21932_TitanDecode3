@@ -34,7 +34,7 @@ public class TestShooter extends LinearOpMode {
         boolean color=true;
         ElapsedTime time1 = new ElapsedTime();
 
-        hood.setHoodPosition(0.70);
+        hood.setHoodPosition(0.60);
         Pose pose;
         waitForStart();
 

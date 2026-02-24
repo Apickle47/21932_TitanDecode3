@@ -34,7 +34,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import java.util.Objects;
 
 @Configurable
-@TeleOp(name = "FirstTeleOpRed")
+//@TeleOp(name = "FirstTeleOpRed")
 public class FirstTeleOpRed extends LinearOpMode {
 
     //SENSOR

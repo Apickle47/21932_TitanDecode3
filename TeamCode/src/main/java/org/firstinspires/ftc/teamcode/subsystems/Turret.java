@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 
+import static org.firstinspires.ftc.teamcode.teleop.dualServoTest.servoName2;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoImplEx;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -16,17 +20,12 @@ import java.util.HashMap;
 @Configurable
 public class Turret {
 
-    //private DcMotor turret;
-    private Servo servoTurret;
-    private Servo servoTurret2;
+    private ServoImplEx servoTurret;
+    private ServoImplEx servoTurret2;
     private static Follower follower;
     //private PinpointLocalizer localizer;
 
-    private double ticksPerRad = (384.5*((double)85/25)) / (2*Math.PI);
-
-    private double rotationLimit = Math.PI * 208;
-
-    public static double rotationSpeed = 1, maxRange = Math.toRadians(355) * 108/96;
+    public static double maxRange = Math.toRadians(355) * 108.0/96;
     public static double x, y, heading, turretHeading, turretHeadingRelative;
 
     public static boolean tracking = false;
@@ -45,8 +44,10 @@ public class Turret {
         //drive = new MecanumDrive(hardwareMap, startPos); // TODO: set this to whatever position auton will end at
         follower = Constants.createFollower(hardwareMap);
         pose = startPos;
-        servoTurret = hardwareMap.get(Servo.class, config.get("turret"));
-        servoTurret2 = hardwareMap.get(Servo.class, config.get("turret2"));
+        servoTurret = hardwareMap.get(ServoImplEx.class, "turret");
+        servoTurret2 = hardwareMap.get(ServoImplEx.class, "turret2");
+        servoTurret.setPwmRange(new PwmControl.PwmRange(500, 2500));
+        servoTurret2.setPwmRange(new PwmControl.PwmRange(500, 2500));
     }
 
     public Pose getPose() {
@@ -62,29 +63,23 @@ public class Turret {
         curBasket = pos;
     }
     public Pose distanceToBasket() {
-        return new Pose(curBasket.getY() -y, curBasket.getX() -x);
+        return new Pose(curBasket.getY() - y, curBasket.getX() - x);
     }
 
     public void setPosition(double degrees) {
         pos = Math.toRadians(degrees);
     }
 
-//    public void resetEncoder() {
-//        turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//    }
-
     public void resetRobotPose(Pose newPos) {
         follower.setPose(newPos);
     }
 
-//    public int getTargetPosition() {
-//        return turret.getTargetPosition();
-//    }
+    public void setAngleOffset(double degrees) {
+        angleOffset += Math.toRadians(degrees);
+    }
 
     public void update() {
 
-        //drive.updatePoseEstimate();
-        //pose = drive.localizer.getPose();
         pose = follower.getPose();
         x = follower.getPose().getX();
         y = follower.getPose().getY();
@@ -118,18 +113,5 @@ public class Turret {
             servoTurret.setPosition((pos/maxRange) + .5);
             servoTurret2.setPosition((pos/maxRange) + .5);
         }
-
-        //for turret with motor
-//        if (tracking) {
-//            turret.setTargetPosition((int) ((turretHeading * ticksPerRad)));
-//            turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            turret.setPower(rotationSpeed);
-//        }
-//        else {
-//            turret.setTargetPosition(pos);
-//            turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            turret.setPower(rotationSpeed);
-//        }
-
     }
 }
