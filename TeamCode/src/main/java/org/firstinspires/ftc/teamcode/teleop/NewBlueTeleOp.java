@@ -35,8 +35,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import java.util.Objects;
 
 @Configurable
-@TeleOp(name = "NewRedTeleOp")
-public class NewRedTeleOp extends OpMode {
+@TeleOp(name = "NewBlueTeleOp")
+public class NewBlueTeleOp extends OpMode {
 
     public static Pose resetPose = new Pose(72,72,Math.toRadians(270) );
     Util util = new Util();
@@ -107,7 +107,7 @@ public class NewRedTeleOp extends OpMode {
 
 
     public void start() {
-        turret.setBasketPos(Turret.redBasket);
+        turret.setBasketPos(Turret.blueBasket);
         follower.update();
         hood.setHoodPosition(0.6);
         rail.setPosition(Rail.INDEX);
@@ -116,7 +116,7 @@ public class NewRedTeleOp extends OpMode {
     }
 
     public void loop() {
-            //Constant update variables
+        //Constant update variables
         follower.setTeleOpDrive(-gamepad1.left_stick_y * driveSpeed, -gamepad1.left_stick_x * driveSpeed, -gamepad1.right_stick_x * driveSpeed);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
         pose = turret.getPose();
@@ -326,8 +326,8 @@ public class NewRedTeleOp extends OpMode {
         telemetryM.addLine("SHOOTER:");
         telemetryM.addData("Shooter vel", shooter.getVelocity());
         telemetryM.addData("Shooter target vel", shooter.getTargetVelocity());
-    //  telemetryM.addData("Keep Shooter Running", keepShooterRunning);
-   //   telemetryM.addData("Preshoot", preshoot);
+        //  telemetryM.addData("Keep Shooter Running", keepShooterRunning);
+        //   telemetryM.addData("Preshoot", preshoot);
         telemetryM.addData("closeB", Mortar.closeB);
         telemetryM.addData("farB", Mortar.farB);
         telemetryM.addLine("");

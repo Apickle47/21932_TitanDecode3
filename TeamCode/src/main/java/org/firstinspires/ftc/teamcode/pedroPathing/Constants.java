@@ -14,17 +14,18 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(33.9)
-            .forwardZeroPowerAcceleration(-46.6483180485766)
-            .lateralZeroPowerAcceleration(-62.1262763537381)
+            .forwardZeroPowerAcceleration(-30.318485369937523)
+            .lateralZeroPowerAcceleration(-53.15618100562531)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.11,0,.002, .065))
             .headingPIDFCoefficients(new PIDFCoefficients(2, 0 , .06, .0001))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(.025, 0, .00001, .06, .01))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(.01, 0, .00001, .06, .01))
             .centripetalScaling(.00005);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 2, 2);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 2, 5);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
@@ -52,9 +53,9 @@ public class Constants {
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD);
-            //.xVelocity(73.90115813007506);
-            //.yVelocity(54.47088671106053);
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .xVelocity(86.77196881151573)
+            .yVelocity(68.36661944051427);
 
 
 

@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.sfdev.assembly.state.StateMachine;
 import com.sfdev.assembly.state.StateMachineBuilder;
@@ -26,15 +26,12 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Util;
 
 @Autonomous
-public class AutoCloseFactory extends OpMode{
-
+public class AutoCloseFactory extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
     private int ballCount;
     private boolean shooting, intaking = false;
-
-
 
     Util util;
     Mortar shooter;
@@ -53,13 +50,14 @@ public class AutoCloseFactory extends OpMode{
     private int shooterTargetSpeed;
     private int launchCount, shootPoseCount, launchIf;
     private double target;
-    private double[] times;
+    private PathState[] idleShoot;
+    private Pose[] idleShootPose;
     private int count;
     ElapsedTime time1 = new ElapsedTime();
 
 
     public enum PathState {
-        DRIVE_START_POS_SHOOT_POS, SHOOT_PRELOAD, SPIKE_ONE, RETURN_SHOOT1, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, DONE, IDLE
+        DRIVE_START_POS_SHOOT_POS, SHOOT_PRELOAD, SPIKE_ONE, RETURN_SHOOT1, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, DONE, IDLE_SHOOT, IDLE_GATE, HIT_GATE1, HIT_GATE2
     }
 
     PathState pathState;
@@ -77,7 +75,6 @@ public class AutoCloseFactory extends OpMode{
     private final Pose gintakePose = new Pose(137.432, 61.0279, 0.4873);
     private final Pose hitGate = new Pose(134.105, 82.3867, 1.511);
     private final Pose hitGateRev = new Pose(134.105, 82.3867, -1.511);
-
 
     private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman, gintakeAway, gintake, returnToShootGintake;
 
@@ -153,114 +150,8 @@ public class AutoCloseFactory extends OpMode{
 
     }
 
-    public void statePathUpdate() {
-
-    }
-
-    StateMachine machine = new StateMachineBuilder()
-            .state(PathState.DRIVE_START_POS_SHOOT_POS)
-            .onEnter( () -> {
-                System.out.println( "Entering the first state" );
-            })
-            .build();
-
-    public void setPathState(PathState newState) {
-        pathState = newState;
-        pathTimer.resetTimer();
-    }
-
-    //INIT
-    @Override
-    public void init() {
-        pathState = PathState.DRIVE_START_POS_SHOOT_POS;
-        pathTimer = new Timer();
-        opModeTimer = new Timer();
-        opModeTimer.resetTimer();
-        follower = Constants.createFollower(hardwareMap);
-        // TODO add in any other init mechanisms
-
-        util = new Util();
-        shooter = new Mortar(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(64.5, 16.4, Math.toRadians(42.5)));
-        intake = new Intake(hardwareMap, util.deviceConf);
-        gate = new Gate(hardwareMap, util.deviceConf);
-        hood = new Hood(hardwareMap, util.deviceConf, new Pose(64.5, 16.4, Math.toRadians(42.5)));
-        signal = new Signal(hardwareMap, util.deviceConf);
-        rail = new Rail(hardwareMap, util.deviceConf);
-        bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
-        middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
-        topSensor = new TopSensor(hardwareMap, util.deviceConf);
-
-        times = new double[]{12.5, 18.5, 30};
-        count = 0;
-
-        turret.setBasketPos(Turret.redBasket);
-
-        buildPaths();
-        follower.setPose(startPose);
-    }
-
-    //START
-    public void start() {
-        opModeTimer.resetTimer();
-        setPathState(pathState);
-        Turret.tracking = true;
-        hood.setHoodPosition(Hood.closeHood);
-        rail.setPosition(Rail.INDEX);
-        //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
-        time1.reset();
-        shooter.setVelocity(1400);
-        ballCount = 3;
-    }
-
-    //LOOP
-    @Override
-    public void loop() {
-//AUTONOMOUS
-        follower.update();
-        statePathUpdate();
-
-//SUBSYSTEMS
-        ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-        shooter.update();
-        turret.update();
-        intake.update();
-        gate.update();
-        hood.update();
-        signal.update();
-        rail.update();
-        bottomSensor.update();
-        middleSensor.update();
-        topSensor.update();
-
-//TELEMETRY
-        telemetry.addData("path state", pathState.toString());
-        telemetry.addData("x", follower.getPose().getX());
-        telemetry.addData("y", follower.getPose().getY());
-        telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.addData("Gate Position", gate.getPosition());
-        telemetry.addData("Path time", pathTimer.getElapsedTimeSeconds());
-        telemetry.addData("opModeTimer", opModeTimer.getElapsedTimeSeconds());
-
-        telemetry.update();
-    }
-
-
-    //    public void sleep(int t) {
-//        try {
-//            Thread.sleep(t); // Wait for 1 millisecond
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt(); // Restore interrupted status
-//            // Optionally, log or handle the interruption
-//        }
-//    }
-    public void Launch() {
-        shooting = true;
-        intake.setAllPower(1);
-    }
-    public void startIntake() {
-        gate.setPosition(Gate.CLOSE);
-        if (!shooting) {
+    private void intakeBalls() {
+        if(intaking) {
             if (ballCount == 0) {
                 signal.setPosition(Signal.VIOLET);
                 gate.setPosition(Gate.CLOSE);
@@ -283,16 +174,183 @@ public class AutoCloseFactory extends OpMode{
                 intake.setAllPower(0);
             }
         }
-        else {
-            gate.setPosition(Gate.CLOSE);
-            if (!shooting) {
-                gate.setPosition(Gate.CLOSE);
-                intake.setAllPower(0);
-            }
-            if (ballCount == 0) {
-                gate.setPosition(Gate.CLOSE);
-                signal.setPosition(1);
-            }
+    }
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        pathState = PathState.DRIVE_START_POS_SHOOT_POS;
+        pathTimer = new Timer();
+        opModeTimer = new Timer();
+        opModeTimer.resetTimer();
+        follower = Constants.createFollower(hardwareMap);
+        idleShoot = new PathState[]{PathState.SPIKE_ONE, PathState.SET_UP2, PathState.GINTAKE};
+        count = 0;
+        // TODO add in any other init mechanisms
+
+        util = new Util();
+        shooter = new Mortar(hardwareMap, util.deviceConf);
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(126.66,129.71, .6879));
+        intake = new Intake(hardwareMap, util.deviceConf);
+        gate = new Gate(hardwareMap, util.deviceConf);
+        hood = new Hood(hardwareMap, util.deviceConf, new Pose(126.66,129.71, .6879));
+        signal = new Signal(hardwareMap, util.deviceConf);
+        rail = new Rail(hardwareMap, util.deviceConf);
+        bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
+        middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
+        topSensor = new TopSensor(hardwareMap, util.deviceConf);
+
+        turret.setBasketPos(Turret.redBasket);
+        follower.setPose(startPose);
+        buildPaths();
+
+        StateMachine machine = new StateMachineBuilder()
+                .state(PathState.DRIVE_START_POS_SHOOT_POS)
+                .onEnter( () -> {
+                    follower.followPath(driveStartPosShootPos, true);
+                })
+                .loop( () -> {
+                    gate.setPosition(Gate.OPEN);
+                    count = 0;
+                })
+                .transition( () -> follower.atPose(shootPose, 1, 1, 1), PathState.IDLE_SHOOT)
+
+                .state(PathState.IDLE_SHOOT)
+                .loop( () -> {
+                    intaking = false;
+                    intake.setAllPower(1);
+                })
+                .transitionTimed(2.5, idleShoot[count])
+
+                .state(PathState.SPIKE_ONE)
+                .onEnter( () -> {
+                    follower.followPath(spikeOne, true);
+                })
+                .loop( () -> {
+                    intaking = true;
+                })
+                .transition( () -> ballCount == 3g, PathState.RETURN_SHOOT1)
+
+                .state(PathState.RETURN_SHOOT1)
+                .onEnter( () -> {
+                    follower.followPath(returnToShoot1, true);
+                    intaking = false;
+                })
+                .loop( () -> {
+                    gate.setPosition(Gate.OPEN);
+                    count = 1;
+                })
+                .transition( () -> follower.atPose(shootPose, 1, 1, 1), PathState.IDLE_SHOOT)
+
+                .state(PathState.SET_UP2)
+                .onEnter( () -> {
+                    follower.followPath(setUpTwo, true);
+                })
+                .transition( () -> follower.atPose(setUp2, 1, 1, 1), PathState.SPIKE_TWO)
+
+                .state(PathState.SPIKE_TWO)
+                .onEnter( () -> {
+                    follower.followPath(spikeTwo, true);
+                })
+                .loop( () -> {
+                    intaking = true;
+                })
+                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT2)
+
+                .state(PathState.RETURN_SHOOT2)
+                .onEnter( () -> {
+                    follower.followPath(returnToShoot2, true);
+                    intaking = false;
+                })
+                .loop( () -> {
+                    gate.setPosition(Gate.OPEN);
+                    count = 2;
+                })
+                .transition( () -> follower.atPose(shootPose,1, 1, 1), PathState.IDLE_SHOOT)
+
+                .state(PathState.GINTAKE)
+                .onEnter( () -> {
+                    gate.setPosition(Gate.CLOSE);
+                    follower.followPath(gintake, true);
+                })
+                .loop( () -> {
+                    gate.setPosition(Gate.CLOSE);
+                    intaking = true;
+                })
+                .transitionTimed(3, PathState.IDLE_GATE)
+
+                .state(PathState.IDLE_GATE)
+                .onEnter( () -> {
+                    gate.setPosition(Gate.CLOSE);
+                    follower.followPath(returnToShootGintake, true);
+                })
+                .loop( () -> {
+                    intaking = true;
+                })
+                .transition( () -> ballCount == 3, PathState.GINTAKE_AWAY)
+
+                .state(PathState.GINTAKE_AWAY)
+                .onEnter( () -> {
+                    follower.followPath(gintakeAway, true);
+                })
+                .transition( () -> follower.atPose(gintakeAwayPose1,1, 1, 1), PathState.RETURN_SHOOT_GINTAKE)
+
+                .state(PathState.RETURN_SHOOT_GINTAKE)
+                .onEnter( () -> {
+                    follower.followPath(returnToShootGintake, true);
+                    intaking = false;
+                })
+                .loop( () -> {
+                    gate.setPosition(Gate.OPEN);
+                    count = 2;
+                })
+                .transition( () -> follower.atPose(shootPose, 1, 1, 1), PathState.IDLE_SHOOT)
+
+
+                .build();
+
+
+
+        waitForStart();
+        shooter.setVelocity(1410);
+        machine.start();
+
+        opModeTimer.resetTimer();
+        Turret.tracking = true;
+        hood.setHoodPosition(Hood.closeHood);
+        rail.setPosition(Rail.INDEX);
+        //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
+        time1.reset();
+        shooter.setVelocity(1450);
+        ballCount = 3;
+
+        while(opModeIsActive()) {
+            follower.update();
+            machine.update();
+            intakeBalls();
+
+            ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
+            shooter.update();
+            turret.update();
+            intake.update();
+            gate.update();
+            hood.update();
+            signal.update();
+            rail.update();
+            bottomSensor.update();
+            middleSensor.update();
+            topSensor.update();
+
+//TELEMETRY
+            telemetry.addData("path state", pathState.toString());
+            telemetry.addData("x", follower.getPose().getX());
+            telemetry.addData("y", follower.getPose().getY());
+            telemetry.addData("heading", follower.getPose().getHeading());
+            telemetry.addData("Gate Position", gate.getPosition());
+            telemetry.addData("Path time", pathTimer.getElapsedTimeSeconds());
+            telemetry.addData("opModeTimer", opModeTimer.getElapsedTimeSeconds());
+
+            telemetry.update();
         }
     }
 }

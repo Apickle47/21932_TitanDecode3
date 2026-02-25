@@ -17,7 +17,7 @@ public class Mortar {
 
     public static double THRESH = 25;
     public static double OFF = 0, MAX = 1, NORMAL = 0.6, WAIT = 1400;
-    public static double slope = 5.9343, closeB = 955, farB = 1035;
+    public static double slope = 5.9343, closeB = 955, farB = 1055;
     public static double p = 200, i = 0, d = 0, f = 13;
 
 

@@ -16,7 +16,7 @@ public class Hood {
     public static boolean tracking = false;
     private double pos;
 
-    public static double minHood = .97, maxHood = .35, closeHood = .6, farHood = .40;
+    public static double minHood = .97, maxHood = .35, closeHood = .6, farHood = .45;
     private static Pose pose;
     public static boolean TEST = false;
     public static double dist;
