@@ -17,15 +17,23 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(33.9)
+            .mass(15.41)
             .forwardZeroPowerAcceleration(-30.318485369937523)
             .lateralZeroPowerAcceleration(-53.15618100562531)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.11,0,.002, .065))
-            .headingPIDFCoefficients(new PIDFCoefficients(2, 0 , .06, .0001))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(.01, 0, .00001, .06, .01))
+            .useSecondaryHeadingPIDF(true)
+            .useSecondaryTranslationalPIDF(true)
+            .useSecondaryDrivePIDF(true)
+            .translationalPIDFCoefficients(PedroDashTuning.translational)
+            .secondaryTranslationalPIDFCoefficients(PedroDashTuning.secondaryTranslational)
+            .headingPIDFCoefficients(PedroDashTuning.heading)
+            .secondaryHeadingPIDFCoefficients(PedroDashTuning.secondaryHeading)
+            .drivePIDFCoefficients(PedroDashTuning.drive)
+            .secondaryDrivePIDFCoefficients(PedroDashTuning.secondaryDrive)
+            .holdPointHeadingScaling(0.6)
+            .holdPointTranslationalScaling(1)
             .centripetalScaling(.00005);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 2, 5);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
