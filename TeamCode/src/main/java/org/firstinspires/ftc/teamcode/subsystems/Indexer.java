@@ -17,25 +17,76 @@ public class Indexer {
     TopSensor topSensor = new TopSensor(hardwareMap, util.deviceConf);
     Intake intake = new Intake(hardwareMap, util.deviceConf);
     Telemetry telemetry;
-    Timer timer = new Timer();
     Timer timer1 = new Timer();
+    Timer timer2 = new Timer();
+
     public void PPG() {
-        //PGP
-        if (Objects.equals(bottomSensor.getColor(), "GREEN")) {
-            intake.setRollerPower(.01);
-            timer.resetTimer();
-            if (timer.getElapsedTime() >= 100) {
-                intake.setRollerPower(0);
-                rail.setPosition(Rail.INDEX);
+        String[] ramp = {"PURPLE", "PURPLE", "GREEN","PURPLE", "PURPLE", "GREEN","PURPLE", "PURPLE", "GREEN"};
+        String[] shotBalls = {};
+        int shotBallCounter;
+        boolean indexing;
+//        //PGP
+//        if (Objects.equals(middleSensor.getColor(), "GREEN")) {
+//            timer.resetTimer();
+//            intake.setRollerPower(1);
+//            indexing = true;
+//            if (timer.getElapsedTime() >= 100 && indexing) {
+//                intake.setIntakePower(0);
+//                rail.setPosition(Rail.INDEX);
+//                indexing = false;
+//            }
+//            if (timer.getElapsedTime() >= 200 && !indexing) {
+//                intake.setAllPower();
+//            }
+        //GPP
+        if (Objects.equals(topSensor.getColor(), "GREEN")) {
+            rail.setPosition(Rail.INDEX);
+            timer1.resetTimer();
+            if(timer1.getElapsedTime() > 500) {
+                intake.setAllPower(1);
             }
-
-
+            if (timer1.getElapsedTime() >= 200) {
+                rail.setPosition(Rail.INLINE);
+            }
         }
+
+
     }
     public void PGP() {
-
+        //PPG
+        if (Objects.equals(bottomSensor.getColor(), "GREEN")) {
+            rail.setPosition(Rail.INDEX);
+            timer1.resetTimer();
+            if(timer1.getElapsedTime() > 500) {
+                intake.setAllPower(1);
+            }
+            if (timer1.getElapsedTime() >= 200) {
+                rail.setPosition(Rail.INLINE);
+            }
+        }
+        //GPP
+        if (Objects.equals(topSensor.getColor(), "GREEN")) {
+            rail.setPosition(Rail.INDEX);
+            timer1.resetTimer();
+            if(timer1.getElapsedTime() > 500) {
+                intake.setRollerPower(1);
+            }
+            if (timer1.getElapsedTime() >= 200) {
+                intake.setAllPower(0);
+                rail.setPosition(Rail.INLINE);
+            }
+            intake.setAllPower(0);
+        }
     }
     public void GPP() {
-//if intake PPG cant index so shoot first to clear in gate
+        //PGP
+        rail.setPosition(Rail.INDEX);
+        timer1.resetTimer();
+        if(timer1.getElapsedTime() > 500) {
+            intake.setAllPower(1);
+        }
+        if (timer1.getElapsedTime() >= 200) {
+            rail.setPosition(Rail.INLINE);
+        }
     }
 }

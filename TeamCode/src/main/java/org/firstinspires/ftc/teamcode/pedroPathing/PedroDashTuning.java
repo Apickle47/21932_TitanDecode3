@@ -13,7 +13,7 @@ public class PedroDashTuning {
             0.02
     );
     public static PIDFCoefficients secondaryTranslational = new PIDFCoefficients(
-            0.13,
+            0.2,
             0,
             0.01,
             0.0005
@@ -23,13 +23,13 @@ public class PedroDashTuning {
             5,
             0,
             0.5,
-            0.03
+            0.02
     );
     public static PIDFCoefficients secondaryHeading = new PIDFCoefficients(
             2,
             0,
             0.09,
-            0.03
+            0.02
     );
 
     public static FilteredPIDFCoefficients drive = new FilteredPIDFCoefficients(

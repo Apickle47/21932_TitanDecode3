@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import java.util.List;
 
 @Autonomous
-public class AutoCloseFactory extends LinearOpMode {
+public class Red_Sort_Auto extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -56,28 +56,30 @@ public class AutoCloseFactory extends LinearOpMode {
     private PathState[] idleShoot;
     private Pose[] idleShootPose;
     private int count;
+    private int gintakeCount;
     ElapsedTime time1 = new ElapsedTime();
 
 
     public enum PathState {
-        DRIVE_START_POS_SHOOT_POS, SHOOT_PRE, SPIKE_ONE, RETURN_SHOOT1, SHOOT_ONE, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SHOOT_TWO, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, GINTAKE_SHOOT, GINTAKE_SETUP, DONE, IDLE_SHOOT, IDLE_GATE, HIT_GATE1, HIT_GATE2
+        DRIVE_START_POS_SHOOT_POS, SHOOT_PRE, SPIKE_ONE, RETURN_SHOOT1, SHOOT_ONE, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SHOOT_TWO, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SHOOT_THREE, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, GINTAKE_SHOOT, GINTAKE_AWAY2, GINTAKE2, RETURN_SHOOT_GINTAKE2, GINTAKE_SHOOT2, GINTAKE_SETUP, DONE, IDLE_SHOOT, IDLE_GATE, IDLE_GATE2, HIT_GATE1, HIT_GATE2
     }
 
     PathState pathState;
 
     private final Pose startPose = new Pose(117.771,126.922, Math.toRadians(38.937));
-    private final Pose shootPose = new Pose(86.8,75.24, 0);
+    private final Pose shootPose = new Pose(85.8,75.24, 0);
+    private final Pose lastShootPose = new Pose(84,109, 0);
     private final Pose spike1 = new Pose(126.7, 84.14, Math.toRadians(0));
     private final Pose setUp2 = new Pose(95, 57.3, Math.toRadians(0));
     private final Pose spike2 = new Pose(120.5,58.2,Math.toRadians(0));
-    private final Pose setUp3 = new Pose(128,68.6, Math.toRadians(-90));
-    private final Pose spike3 = new Pose(128, 35, Math.toRadians(0));
+    private final Pose setUp3 = new Pose(95,35, Math.toRadians(0));
+    private final Pose spike3 = new Pose(134, 35, Math.toRadians(0));
     private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90));
     private final Pose humanPose = new Pose(130,7, Math.toRadians(-90));
-    private final Pose gintakeAwayPose1 = new Pose(102.65, 61.4, 0);
-    private final Pose gintakePose = new Pose(130.87, 59.10, Math.toRadians(36.70));  //1 degree = 0.01745329251994329576923690768489 rad
-    private final Pose hitGate = new Pose(136.105, 80, Math.toRadians(-90));
-    private final Pose hitGateRev = new Pose(130,60.6, Math.toRadians(-90));
+    private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0);
+    private final Pose gintakePose = new Pose(130.51, 59.58, 0.4560);  //1 degree = 0.01745329251994329576923690768489 rad
+    private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90));
+    private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90));
 
 
     private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman, gintakeAway, gintake, returnToShootGintake, gintakeSetup;
@@ -94,14 +96,14 @@ public class AutoCloseFactory extends LinearOpMode {
         spikeOne = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, spike1))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), spike1.getHeading())
-                .addPath(new BezierLine(spike1, hitGate))
-                .setLinearHeadingInterpolation(spike2.getHeading(), hitGate.getHeading())
+                //.addPath(new BezierLine(spike1, hitGate))
+                //.setLinearHeadingInterpolation(spike2.getHeading(), hitGate.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
 
         returnToShoot1 = follower.pathBuilder()
-                .addPath(new BezierLine(hitGate, shootPose))
-                .setLinearHeadingInterpolation(hitGate.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(spike1, lastShootPose))
+                .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
                 .addParametricCallback(0.99, () -> follower.setMaxPower(1))
@@ -184,7 +186,7 @@ public class AutoCloseFactory extends LinearOpMode {
                 .addPath(new BezierLine(gintakeAwayPose1, shootPose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
+                .addParametricCallback(.85, () -> follower.setMaxPower(0.4))
                 .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
 
@@ -229,12 +231,13 @@ public class AutoCloseFactory extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         idleShoot = new PathState[]{PathState.SPIKE_ONE, PathState.SPIKE_TWO, PathState.GINTAKE};
         count = 0;
-        double shootTime = 0.5;
+        double shootTime = 0.4;
+        gintakeCount = 1;
         // TODO add in any other init mechanisms
 
         util = new Util();
         shooter = new Mortar(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(38.937)));
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(40.937)));
         intake = new Intake(hardwareMap, util.deviceConf);
         gate = new Gate(hardwareMap, util.deviceConf);
         hood = new Hood(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(38.937)));
@@ -258,9 +261,8 @@ public class AutoCloseFactory extends LinearOpMode {
                     gate.setPosition(Gate.OPEN);
                     count = -1;
                 })
-                .transition( () -> !follower.isBusy()
-                        && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5))
-                        , PathState.SHOOT_PRE)
+                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_PRE)
+
 
                 //good
                 .state(PathState.SHOOT_PRE)
@@ -269,40 +271,9 @@ public class AutoCloseFactory extends LinearOpMode {
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.SET_UP2)
+                .transitionTimed(shootTime, PathState.SPIKE_ONE)
 
-/*
-                .state(PathState.SPIKE_ONE)
-                .onEnter( () -> {
-                    shooting = false;
-                    follower.followPath(spikeOne, true);
-                })
-                .loop( () -> {
-                    intaking = true;
-                })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT1)
-                .transitionTimed(3, PathState.RETURN_SHOOT1)
 
-                .state(PathState.RETURN_SHOOT1)
-                .onEnter( () -> {
-                    follower.followPath(returnToShoot1, true);
-                    intaking = false;
-                })
-                .loop( () -> {
-                    gate.setPosition(Gate.OPEN);
-                })
-                .transition( () -> !follower.isBusy()
-                              //  && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5))
-                        , PathState.SHOOT_ONE)
-
-                .state(PathState.SHOOT_ONE)
-                .loop( () -> {
-                    shooting = true;
-                    intaking = false;
-                    intake.setAllPower(1);
-                })
-                .transitionTimed(shootTime, PathState.SPIKE_TWO)
-*/
                 .state(PathState.SET_UP2)
                 .onEnter( () -> {
                     shooting = false;
@@ -313,6 +284,7 @@ public class AutoCloseFactory extends LinearOpMode {
                     intaking = false;
                 })
                 .transition( () -> !follower.isBusy(), PathState.SPIKE_TWO)
+
 
                 .state(PathState.SPIKE_TWO)
                 .onEnter( () -> {
@@ -334,9 +306,8 @@ public class AutoCloseFactory extends LinearOpMode {
                 .loop( () -> {
                     gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> !follower.isBusy()
-                        && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5))
-                        , PathState.SHOOT_TWO)
+                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_TWO)
+
 
                 .state(PathState.SHOOT_TWO)
                 .loop( () -> {
@@ -344,7 +315,53 @@ public class AutoCloseFactory extends LinearOpMode {
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.GINTAKE)
+                .transitionTimed(shootTime, PathState.SET_UP3)
+
+
+                .state(PathState.SET_UP3)
+                .onEnter( () -> {
+                    shooting = false;
+                    follower.followPath(setUpThree, true);
+                })
+                .loop( () -> {
+                    shooting = false;
+                    intaking = false;
+                })
+                .transition( () -> !follower.isBusy(), PathState.SPIKE_THREE)
+
+
+                .state(PathState.SPIKE_THREE)
+                .onEnter( () -> {
+                    follower.followPath(spikeThree, true);
+                })
+                .loop( () -> {
+                    intaking = true;
+                })
+                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT3)
+                .transitionTimed(2.5, PathState.RETURN_SHOOT3)
+
+
+                .state(PathState.RETURN_SHOOT3)
+                .onEnter( () -> {
+                    follower.followPath(returnToShoot3, true);
+                    intake.setAllPower(0);
+                    intaking = false;
+                })
+                .loop( () -> {
+                    gate.setPosition(Gate.OPEN);
+                })
+                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_THREE)
+
+
+                .state(PathState.SHOOT_THREE)
+                .loop( () -> {
+                    shooting = true;
+                    intaking = false;
+                    intake.setAllPower(1);
+                })
+
+
+
 /*
                 .state(PathState.GINTAKE_SETUP)
                 .onEnter( () -> {
@@ -369,7 +386,8 @@ public class AutoCloseFactory extends LinearOpMode {
                     gate.setPosition(Gate.CLOSE);
                     intaking = true;
                 })
-                .transitionTimed(1.5, PathState.IDLE_GATE)
+                .transitionTimed(1, PathState.IDLE_GATE)
+
 
                 .state(PathState.IDLE_GATE)
                 .onEnter( () -> {
@@ -378,8 +396,8 @@ public class AutoCloseFactory extends LinearOpMode {
                 .loop( () -> {
                     intaking = true;
                 })
-                .transition( () -> ballCount == 3, PathState.GINTAKE_AWAY)
-                .transitionTimed(3, PathState.GINTAKE_AWAY)
+                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE)
+                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE)
 
 
                 .state(PathState.GINTAKE_AWAY)
@@ -389,6 +407,7 @@ public class AutoCloseFactory extends LinearOpMode {
                     follower.followPath(gintakeAway, true);
                 })
                 .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE)
+
 
                 .state(PathState.RETURN_SHOOT_GINTAKE)
                 .onEnter( () -> {
@@ -403,8 +422,9 @@ public class AutoCloseFactory extends LinearOpMode {
                     gate.setPosition(Gate.OPEN);
                 })
                 .transition( () -> !follower.isBusy()
-                        && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
+                                && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
                         , PathState.GINTAKE_SHOOT)
+
 
                 .state(PathState.GINTAKE_SHOOT)
                 .loop( () -> {
@@ -413,7 +433,102 @@ public class AutoCloseFactory extends LinearOpMode {
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.GINTAKE)
+                .transitionTimed(shootTime, PathState.GINTAKE2)
+
+
+                .state(PathState.GINTAKE2)
+                .onEnter( () -> {
+                    shooting = false;
+                    gate.setPosition(Gate.CLOSE);
+                    follower.followPath(gintake, true);
+                })
+                .loop( () -> {
+                    shooting = false;
+
+                    gate.setPosition(Gate.CLOSE);
+                    intaking = true;
+                })
+                .transitionTimed(1, PathState.IDLE_GATE2)
+
+
+                .state(PathState.IDLE_GATE2)
+                .onEnter( () -> {
+                    gate.setPosition(Gate.CLOSE);
+                })
+                .loop( () -> {
+                    intaking = true;
+                })
+                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE2)
+                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE2)
+
+
+                .state(PathState.GINTAKE_AWAY2)
+                .onEnter( () -> {
+                    gate.setPosition(Gate.OPEN);
+                    intaking = false;
+                    follower.followPath(gintakeAway, true);
+                })
+                .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE2)
+
+
+                .state(PathState.RETURN_SHOOT_GINTAKE2)
+                .onEnter( () -> {
+                    shooting = true;
+                    follower.followPath(returnToShootGintake, true);
+                    intake.setAllPower(0);
+                    intaking = false;
+                })
+                .loop( () -> {
+                    shooting = true;
+                    intaking = false;
+                    gate.setPosition(Gate.OPEN);
+                })
+                .transition( () -> !follower.isBusy()
+                                && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
+                        , PathState.GINTAKE_SHOOT2)
+
+
+                .state(PathState.GINTAKE_SHOOT2)
+                .loop( () -> {
+                    shooting = true;
+                    gate.setPosition(Gate.OPEN);
+                    intaking = false;
+                    intake.setAllPower(1);
+                })
+                .transitionTimed(shootTime, PathState.SPIKE_ONE)
+
+
+                .state(PathState.SPIKE_ONE)
+                .onEnter( () -> {
+                    shooting = false;
+                    follower.followPath(spikeOne, true);
+                })
+                .loop( () -> {
+                    intaking = true;
+                })
+                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT1)
+                .transitionTimed(3, PathState.RETURN_SHOOT1)
+
+
+                .state(PathState.RETURN_SHOOT1)
+                .onEnter( () -> {
+                    follower.followPath(returnToShoot1, true);
+                    intaking = false;
+                })
+                .loop( () -> {
+                    gate.setPosition(Gate.OPEN);
+                })
+                .transition( () -> !follower.isBusy() && follower.atPose(lastShootPose, 1, 1, Math.toRadians(5)), PathState.SHOOT_ONE)
+
+
+                .state(PathState.SHOOT_ONE)
+                .loop( () -> {
+                    shooting = true;
+                    intaking = false;
+                    intake.setAllPower(1);
+                })
+                .transitionTimed(shootTime, PathState.SET_UP2)
+
 
 
                 .build();
@@ -426,11 +541,11 @@ public class AutoCloseFactory extends LinearOpMode {
 
         opModeTimer.resetTimer();
         Turret.tracking = true;
-        hood.setHoodPosition(.58);
+        hood.setHoodPosition(.56);
         rail.setPosition(Rail.INDEX);
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
         time1.reset();
-        shooter.setVelocity(1420);
+        shooter.setVelocity(1430);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -469,6 +584,7 @@ public class AutoCloseFactory extends LinearOpMode {
             telemetry.addData("opModeTimer", opModeTimer.getElapsedTimeSeconds());
             //telemetry.addData("count", count);
             telemetry.addData("ball count", ballCount);
+            telemetry.addData("gintakeCount", gintakeCount);
 
             telemetry.update();
         }
