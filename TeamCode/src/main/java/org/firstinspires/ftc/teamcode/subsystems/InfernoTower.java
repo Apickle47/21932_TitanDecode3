@@ -21,7 +21,7 @@ public class InfernoTower {
 
     private AprilTagProcessor aprilTagProcessor;
     private List<AprilTagDetection> aprilTagDetections;
-    private AprilTagDetection aprilTagDetection;
+    private int aprilTag;
 
 
     private int cameraWidth = 640, cameraHeight = 480; // TODO: set proper aspect ratio and resolution if needed
@@ -47,7 +47,16 @@ public class InfernoTower {
     }
 
     public List<AprilTagDetection> detectAprilTags() {
-        aprilTagDetections = aprilTagProcessor.getDetections();
+        aprilTagDetections = aprilTagProcessor.getFreshDetections();
         return aprilTagDetections;
+    }
+
+    public int getLatestDetections() {
+        for(AprilTagDetection aprilTagDetection : detectAprilTags()) {
+            if (aprilTagDetection.metadata != null) {
+                aprilTag = aprilTagDetection.id;
+            }
+        }
+        return aprilTag;
     }
 }

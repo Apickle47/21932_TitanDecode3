@@ -17,6 +17,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.BottomSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Gate;
 import org.firstinspires.ftc.teamcode.subsystems.Hood;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.subsystems.InfernoTower;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.MiddleSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Mortar;
@@ -25,6 +27,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Signal;
 import org.firstinspires.ftc.teamcode.subsystems.TopSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.Util;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
 
@@ -47,12 +50,14 @@ public class Red_Sort_Auto extends LinearOpMode {
     BottomSensor bottomSensor;
     MiddleSensor middleSensor;
     TopSensor topSensor;
+    InfernoTower camera;
+    Indexer indexer;
 
     public static int KICKER_WAIT_TIME = 600;
 
     private int shooterTargetSpeed;
     private int launchCount, shootPoseCount, launchIf;
-    private double target;
+    private double sortID;
     private PathState[] idleShoot;
     private Pose[] idleShootPose;
     private int count;
@@ -67,6 +72,7 @@ public class Red_Sort_Auto extends LinearOpMode {
     PathState pathState;
 
     private final Pose startPose = new Pose(117.771,126.922, Math.toRadians(38.937));
+    private final Pose scanShootPose = new Pose(117.771,126.922, Math.toRadians(90));
     private final Pose shootPose = new Pose(85.8,75.24, 0);
     private final Pose lastShootPose = new Pose(84,109, 0);
     private final Pose spike1 = new Pose(126.7, 84.14, Math.toRadians(0));
@@ -87,15 +93,15 @@ public class Red_Sort_Auto extends LinearOpMode {
     public void buildPaths() {
         // put in coordinates for starting pose > ending pose
         driveStartPosShootPos = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, shootPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(startPose, scanShootPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), scanShootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
                 .addParametricCallback(0.99, () -> follower.setMaxPower(0.8))
                 .build();
         spikeOne = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, spike1))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), spike1.getHeading())
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 //.addPath(new BezierLine(spike1, hitGate))
                 //.setLinearHeadingInterpolation(spike2.getHeading(), hitGate.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
@@ -260,6 +266,7 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .loop( () -> {
                     gate.setPosition(Gate.OPEN);
                     count = -1;
+                    sortID = camera.getLatestDetections();
                 })
                 .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_PRE)
 
@@ -561,6 +568,11 @@ public class Red_Sort_Auto extends LinearOpMode {
             follower.update();
             machine.update();
             intakeBalls();
+            switch((int) sortID) {
+                case 21 : indexer.GPP(shooting);
+                case 22 : indexer.PGP(shooting);
+                case 23 : indexer.PPG(shooting);
+            }
 
             ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
             shooter.update();
@@ -575,6 +587,7 @@ public class Red_Sort_Auto extends LinearOpMode {
             topSensor.update();
 
 //TELEMETRY
+            telemetry.addData("Latest AprilTag Reading", camera.getLatestDetections());
             telemetry.addData("path state", pathState.toString());
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
