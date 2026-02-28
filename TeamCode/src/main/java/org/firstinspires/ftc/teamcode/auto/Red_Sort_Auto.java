@@ -30,6 +30,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
+import java.util.Objects;
 
 @Autonomous
 public class Red_Sort_Auto extends LinearOpMode {
@@ -62,7 +63,8 @@ public class Red_Sort_Auto extends LinearOpMode {
     private Pose[] idleShootPose;
     private int count;
     private int gintakeCount;
-    ElapsedTime time1 = new ElapsedTime();
+    private boolean indexing = false;
+    Timer timer1;
 
 
     public enum PathState {
@@ -72,14 +74,14 @@ public class Red_Sort_Auto extends LinearOpMode {
     PathState pathState;
 
     private final Pose startPose = new Pose(117.771,126.922, Math.toRadians(38.937));
-    private final Pose scanShootPose = new Pose(117.771,126.922, Math.toRadians(90));
+    private final Pose scanShootPose = new Pose(85.8,75.24, Math.toRadians(90));
     private final Pose shootPose = new Pose(85.8,75.24, 0);
     private final Pose lastShootPose = new Pose(84,109, 0);
-    private final Pose spike1 = new Pose(126.7, 84.14, Math.toRadians(0));
-    private final Pose setUp2 = new Pose(95, 57.3, Math.toRadians(0));
+    private final Pose spike1 = new Pose(127.7, 84.14, Math.toRadians(0));
+    private final Pose setUp2 = new Pose(95, 58.2, Math.toRadians(0));
     private final Pose spike2 = new Pose(120.5,58.2,Math.toRadians(0));
     private final Pose setUp3 = new Pose(95,35, Math.toRadians(0));
-    private final Pose spike3 = new Pose(134, 35, Math.toRadians(0));
+    private final Pose spike3 = new Pose(135, 35, Math.toRadians(0));
     private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90));
     private final Pose humanPose = new Pose(130,7, Math.toRadians(-90));
     private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0);
@@ -94,13 +96,13 @@ public class Red_Sort_Auto extends LinearOpMode {
         // put in coordinates for starting pose > ending pose
         driveStartPosShootPos = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scanShootPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), scanShootPose.getHeading())
+                .setLinearHeadingInterpolation(startPose.getHeading(), scanShootPose.getHeading(), 0.8)
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
                 .addParametricCallback(0.99, () -> follower.setMaxPower(0.8))
                 .build();
         spikeOne = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, spike1))
+                .addPath(new BezierLine(scanShootPose, spike1))
                 .setConstantHeadingInterpolation(Math.toRadians(0))
                 //.addPath(new BezierLine(spike1, hitGate))
                 //.setLinearHeadingInterpolation(spike2.getHeading(), hitGate.getHeading())
@@ -109,20 +111,20 @@ public class Red_Sort_Auto extends LinearOpMode {
 
         returnToShoot1 = follower.pathBuilder()
                 .addPath(new BezierLine(spike1, lastShootPose))
-                .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
+                .setConstantHeadingInterpolation(0)
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
                 .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpTwo = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUp2))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), setUp2.getHeading())
+                .setConstantHeadingInterpolation(0)
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
 
         spikeTwo = follower.pathBuilder()
                 .addPath(new BezierLine(setUp2,spike2))
-                .setLinearHeadingInterpolation(setUp2.getHeading(), spike2.getHeading())
+                .setConstantHeadingInterpolation(0)
                 .addPath(new BezierLine(spike2, hitGateRev))
                 .setLinearHeadingInterpolation(spike2.getHeading(), hitGateRev.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
@@ -237,7 +239,7 @@ public class Red_Sort_Auto extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
         idleShoot = new PathState[]{PathState.SPIKE_ONE, PathState.SPIKE_TWO, PathState.GINTAKE};
         count = 0;
-        double shootTime = 0.4;
+        double shootTime = 4;
         gintakeCount = 1;
         // TODO add in any other init mechanisms
 
@@ -252,6 +254,9 @@ public class Red_Sort_Auto extends LinearOpMode {
         bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
+        camera = new InfernoTower(hardwareMap, util.deviceConf);
+        indexer = new Indexer(hardwareMap, util.deviceConf);
+        timer1 = new Timer();
 
         turret.setBasketPos(Turret.redBasket);
         follower.setPose(startPose);
@@ -268,7 +273,7 @@ public class Red_Sort_Auto extends LinearOpMode {
                     count = -1;
                     sortID = camera.getLatestDetections();
                 })
-                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_PRE)
+                .transition( () -> !follower.isBusy() && follower.atPose(scanShootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_PRE)
 
 
                 //good
@@ -278,7 +283,7 @@ public class Red_Sort_Auto extends LinearOpMode {
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.SPIKE_ONE)
+                .transitionTimed(shootTime, PathState.SET_UP2)
 
 
                 .state(PathState.SET_UP2)
@@ -288,7 +293,9 @@ public class Red_Sort_Auto extends LinearOpMode {
                 })
                 .loop( () -> {
                     shooting = false;
-                    intaking = false;
+                    intaking = true;
+                    if (sortID == 22) { rail.setPosition(Rail.INDEX); }
+
                 })
                 .transition( () -> !follower.isBusy(), PathState.SPIKE_TWO)
 
@@ -296,22 +303,47 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .state(PathState.SPIKE_TWO)
                 .onEnter( () -> {
                     follower.followPath(spikeTwo, true);
+                    intake.setAllPower(1);
                 })
                 .loop( () -> {
                     intaking = true;
+                    indexing = true;
                 })
                 .transition( () -> ballCount == 3, PathState.RETURN_SHOOT2)
-                .transitionTimed(2.5, PathState.RETURN_SHOOT2)
+                .transitionTimed(3.5, PathState.RETURN_SHOOT2)
 
 
                 .state(PathState.RETURN_SHOOT2)
                 .onEnter( () -> {
                     follower.followPath(returnToShoot2, true);
-                    intake.setAllPower(0);
                     intaking = false;
+
                 })
                 .loop( () -> {
                     gate.setPosition(Gate.OPEN);
+                    switch((int) sortID) {
+                        case(21):
+                            if (Objects.equals(topSensor.getColor(), "PURPLE")) {
+                                intake.setAllPower(0);
+                                rail.setPosition(Rail.INDEX);
+                            }
+                            else {
+                                intake.setAllPower(0);
+                            }
+                            break;
+                        case (22):
+                            intake.setAllPower(0);
+                            break;
+                        case (23):
+                            rail.setPosition(Rail.INDEX);
+                            timer1.resetTimer();
+                            //if(timer1.getElapsedTime() > 500 && shooting) {
+                                intake.setAllPower(1);
+                                //timer1.resetTimer();
+                                //if (timer1.getElapsedTime() >= 200) {
+                                    rail.setPosition(Rail.INLINE);
+                                //}
+                    }
                 })
                 .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_TWO)
 
@@ -319,20 +351,28 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .state(PathState.SHOOT_TWO)
                 .loop( () -> {
                     shooting = true;
-                    intaking = false;
-                    intake.setAllPower(1);
+                    intake.setAllPower(0.4);
+                    if (ballCount >= 1) {
+                        intake.setAllPower(1);
+                    }
+                    if (ballCount == 0) {
+                        rail.setPosition(Rail.INLINE);
+                    }
+//                    intake.setAllPower(1)
                 })
                 .transitionTimed(shootTime, PathState.SET_UP3)
 
 
                 .state(PathState.SET_UP3)
                 .onEnter( () -> {
+                    intake.setAllPower(0);
                     shooting = false;
                     follower.followPath(setUpThree, true);
                 })
                 .loop( () -> {
                     shooting = false;
-                    intaking = false;
+                    intaking = true;
+                    intake.setAllPower(1);
                 })
                 .transition( () -> !follower.isBusy(), PathState.SPIKE_THREE)
 
@@ -340,22 +380,41 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .state(PathState.SPIKE_THREE)
                 .onEnter( () -> {
                     follower.followPath(spikeThree, true);
+                    intake.setAllPower(1);
                 })
                 .loop( () -> {
                     intaking = true;
                 })
                 .transition( () -> ballCount == 3, PathState.RETURN_SHOOT3)
-                .transitionTimed(2.5, PathState.RETURN_SHOOT3)
+                .transitionTimed(3, PathState.RETURN_SHOOT3)
 
 
                 .state(PathState.RETURN_SHOOT3)
                 .onEnter( () -> {
                     follower.followPath(returnToShoot3, true);
-                    intake.setAllPower(0);
                     intaking = false;
                 })
                 .loop( () -> {
                     gate.setPosition(Gate.OPEN);
+                    switch((int) sortID) {
+                        case(21):
+                            intake.setAllPower(0);
+                            break;
+                        case 22 :
+                            if (Objects.equals(topSensor.getColor(), "GREEN")) {
+                                rail.setPosition(Rail.INDEX);
+                                intake.setAllPower(0);
+                            }
+                            else {
+                                intake.setAllPower(0);
+                            }
+                        case 23 :
+                            rail.setPosition(Rail.INDEX);
+                            intake.setAllPower(1);
+                            rail.setPosition(Rail.INLINE);
+
+
+                    }
                 })
                 .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_THREE)
 
@@ -363,9 +422,20 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .state(PathState.SHOOT_THREE)
                 .loop( () -> {
                     shooting = true;
-                    intaking = false;
-                    intake.setAllPower(1);
+                    if (sortID == 22) {
+                        rail.setPosition(Rail.INDEX);
+                        intake.setRollerPower(1);
+                        if (ballCount==1 && topSensor.hasBall() != 1) {
+                            rail.setPosition(Rail.INLINE);
+                        }
+                    }
+                    else {
+                        intaking = false;
+                        intake.setAllPower(1);
+                        rail.setPosition(Rail.INLINE);
+                    }
                 })
+                .transitionTimed(shootTime, PathState.SPIKE_ONE)
 
 
 
@@ -428,9 +498,7 @@ public class Red_Sort_Auto extends LinearOpMode {
                     intaking = false;
                     gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> !follower.isBusy()
-                                && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
-                        , PathState.GINTAKE_SHOOT)
+                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 1, 1, Math.toRadians(5)), PathState.GINTAKE_SHOOT)
 
 
                 .state(PathState.GINTAKE_SHOOT)
@@ -508,6 +576,7 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .state(PathState.SPIKE_ONE)
                 .onEnter( () -> {
                     shooting = false;
+                    intaking = true;
                     follower.followPath(spikeOne, true);
                 })
                 .loop( () -> {
@@ -524,6 +593,28 @@ public class Red_Sort_Auto extends LinearOpMode {
                 })
                 .loop( () -> {
                     gate.setPosition(Gate.OPEN);
+                    switch((int) sortID) {
+                        case(21):
+                            intake.setAllPower(0);
+                            break;
+                        case 22 :
+                            if (Objects.equals(topSensor.getColor(), "GREEN")) {
+                                rail.setPosition(Rail.INDEX);
+                                intake.setAllPower(0);
+                            }
+                            else { intake.setAllPower(0);}
+                            break;
+                        case 23 :
+                            rail.setPosition(Rail.INDEX);
+                            //timer1.resetTimer();
+                            //if(timer1.getElapsedTime() > 500 && shooting) {
+                                intake.setAllPower(1);
+                                //timer1.resetTimer();
+                              //  if (timer1.getElapsedTime() >= 200) {
+                                    rail.setPosition(Rail.INLINE);
+                                //}
+
+                    }
                 })
                 .transition( () -> !follower.isBusy() && follower.atPose(lastShootPose, 1, 1, Math.toRadians(5)), PathState.SHOOT_ONE)
 
@@ -531,10 +622,15 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .state(PathState.SHOOT_ONE)
                 .loop( () -> {
                     shooting = true;
+                    intake.setAllPower(.3);
+                    if (ballCount == 0) {
+                        rail.setPosition(Rail.INLINE);
+                        intake.setAllPower(1);
+                    }
                     intaking = false;
-                    intake.setAllPower(1);
+                    rail.setPosition(Rail.INDEX);
+//                    intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.SET_UP2)
 
 
 
@@ -543,16 +639,15 @@ public class Red_Sort_Auto extends LinearOpMode {
 
 
         waitForStart();
-        shooter.setVelocity(1420);
+        shooter.setVelocity(1440);
         machine.start();
 
         opModeTimer.resetTimer();
         Turret.tracking = true;
-        hood.setHoodPosition(.56);
-        rail.setPosition(Rail.INDEX);
+        hood.setHoodPosition(.60);
+        rail.setPosition(Rail.INLINE);
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
-        time1.reset();
-        shooter.setVelocity(1430);
+        shooter.setVelocity(1440);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -568,10 +663,12 @@ public class Red_Sort_Auto extends LinearOpMode {
             follower.update();
             machine.update();
             intakeBalls();
-            switch((int) sortID) {
-                case 21 : indexer.GPP(shooting);
-                case 22 : indexer.PGP(shooting);
-                case 23 : indexer.PPG(shooting);
+            if (indexing) {
+                switch((int) sortID) {
+                    case 21 : indexer.GPP(shooting);
+                    case 22 : indexer.PGP(shooting);
+                    case 23 : indexer.PPG(shooting);
+                }
             }
 
             ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
@@ -585,6 +682,7 @@ public class Red_Sort_Auto extends LinearOpMode {
             bottomSensor.update();
             middleSensor.update();
             topSensor.update();
+            rail.update();
 
 //TELEMETRY
             telemetry.addData("Latest AprilTag Reading", camera.getLatestDetections());
@@ -596,8 +694,12 @@ public class Red_Sort_Auto extends LinearOpMode {
             telemetry.addData("Path time", pathTimer.getElapsedTimeSeconds());
             telemetry.addData("opModeTimer", opModeTimer.getElapsedTimeSeconds());
             //telemetry.addData("count", count);
+            telemetry.addData("topSensor", topSensor.getColor());
+            telemetry.addData("middleSensor", middleSensor.getColor());
+            telemetry.addData("bottomSensor", bottomSensor.getColor());
             telemetry.addData("ball count", ballCount);
             telemetry.addData("gintakeCount", gintakeCount);
+            telemetry.addData("timer", timer1);
 
             telemetry.update();
         }

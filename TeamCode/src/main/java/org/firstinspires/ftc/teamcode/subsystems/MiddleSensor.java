@@ -15,6 +15,8 @@ public class MiddleSensor {
     NormalizedColorSensor middleSensor;
     private String color;
     public int cm;
+    private float normRed, normGreen, normBlue;
+
     public MiddleSensor(HardwareMap hwMap, HashMap<String, String> config) {
         middleSensor = hwMap.get(NormalizedColorSensor.class, config.get("middleSensor"));
         middleSensor.setGain(4);
@@ -23,7 +25,6 @@ public class MiddleSensor {
     public void update() {
         NormalizedRGBA colors = middleSensor.getNormalizedColors();
 
-        float normRed, normGreen, normBlue;
         normRed = colors.red / colors.alpha;
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
@@ -42,6 +43,9 @@ public class MiddleSensor {
             color = "UNKNOWN";
         }
     }
+    public float getR() {return normRed;}
+    public float getG() {return normGreen;}
+    public float getB() {return normBlue;}
     public String getColor() {
         return color;
     }

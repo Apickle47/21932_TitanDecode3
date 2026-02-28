@@ -52,10 +52,16 @@ public class InfernoTower {
     }
 
     public int getLatestDetections() {
-        for(AprilTagDetection aprilTagDetection : detectAprilTags()) {
-            if (aprilTagDetection.metadata != null) {
-                aprilTag = aprilTagDetection.id;
+        detectAprilTags();
+        if (aprilTagDetections != null) {
+            for(AprilTagDetection aprilTagDetection : aprilTagDetections) {
+                if (aprilTagDetection.metadata != null) {
+                    aprilTag = aprilTagDetection.id;
+                }
             }
+        }
+        else {
+            aprilTag = -1;
         }
         return aprilTag;
     }

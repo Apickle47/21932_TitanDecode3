@@ -13,6 +13,7 @@ public class BottomSensor {
     NormalizedColorSensor bottomSensor;
     private String color;
     public int cb;
+    private float normRed, normGreen, normBlue;
     public BottomSensor(HardwareMap hwMap, HashMap<String, String> config) {
         bottomSensor = hwMap.get(NormalizedColorSensor.class, config.get("bottomSensor"));
         bottomSensor.setGain(4);
@@ -21,7 +22,7 @@ public class BottomSensor {
     public void update() {
         NormalizedRGBA colors = bottomSensor.getNormalizedColors();
 
-        float normRed, normGreen, normBlue;
+
         normRed = colors.red / colors.alpha;
         normGreen = colors.green / colors.alpha;
         normBlue = colors.blue / colors.alpha;
@@ -41,8 +42,11 @@ public class BottomSensor {
         else {
             color = "UNKNOWN";
         }
-
     }
+    public float getR() {return normRed;}
+    public float getG() {return normGreen;}
+    public float getB() {return normBlue;}
+
     public String getColor() {
         return color;
     }

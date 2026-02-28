@@ -483,7 +483,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
 
 
         waitForStart();
-        shooter.setVelocity(1420);
+        shooter.setVelocity(1480);
         machine.start();
 
         opModeTimer.resetTimer();
@@ -492,7 +492,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
         rail.setPosition(Rail.INDEX);
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
         time1.reset();
-        shooter.setVelocity(1430);
+        shooter.setVelocity(1480);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
