@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Autonomous
-public class Red_Sort_Auto extends LinearOpMode {
+public class RedSort extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -54,17 +54,12 @@ public class Red_Sort_Auto extends LinearOpMode {
     InfernoTower camera;
     Indexer indexer;
 
-    public static int KICKER_WAIT_TIME = 600;
 
     private int shooterTargetSpeed;
     private int launchCount, shootPoseCount, launchIf;
     private double sortID;
-    private PathState[] idleShoot;
-    private Pose[] idleShootPose;
     private int count;
-    private int gintakeCount;
     private boolean indexing = false;
-    Timer timer1;
 
 
     public enum PathState {
@@ -81,7 +76,7 @@ public class Red_Sort_Auto extends LinearOpMode {
     private final Pose setUp2 = new Pose(95, 58.2, Math.toRadians(0));
     private final Pose spike2 = new Pose(120.5,58.2,Math.toRadians(0));
     private final Pose setUp3 = new Pose(95,35, Math.toRadians(0));
-    private final Pose spike3 = new Pose(135, 35, Math.toRadians(0));
+    private final Pose spike3 = new Pose(140, 35, Math.toRadians(0));
     private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90));
     private final Pose humanPose = new Pose(130,7, Math.toRadians(-90));
     private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0);
@@ -160,18 +155,6 @@ public class Red_Sort_Auto extends LinearOpMode {
                 .setLinearHeadingInterpolation(shootPose.getHeading(), setUpH.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
-        human = follower.pathBuilder()
-                .addPath(new BezierLine(setUpH, humanPose))
-                .setLinearHeadingInterpolation(setUpH.getHeading(), humanPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .build();
-        returnShootHuman = follower.pathBuilder()
-                .addPath(new BezierLine(humanPose, shootPose))
-                .setLinearHeadingInterpolation(humanPose.getHeading(), shootPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
-                .build();
         gintakeSetup = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, gintakeAwayPose1))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), gintakeAwayPose1.getHeading())
@@ -237,10 +220,8 @@ public class Red_Sort_Auto extends LinearOpMode {
         opModeTimer = new Timer();
         opModeTimer.resetTimer();
         follower = Constants.createFollower(hardwareMap);
-        idleShoot = new PathState[]{PathState.SPIKE_ONE, PathState.SPIKE_TWO, PathState.GINTAKE};
         count = 0;
-        double shootTime = 4;
-        gintakeCount = 1;
+        double shootTime = 3;
         // TODO add in any other init mechanisms
 
         util = new Util();
@@ -256,14 +237,12 @@ public class Red_Sort_Auto extends LinearOpMode {
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
         camera = new InfernoTower(hardwareMap, util.deviceConf);
         indexer = new Indexer(hardwareMap, util.deviceConf);
-        timer1 = new Timer();
 
         turret.setBasketPos(Turret.redBasket);
         follower.setPose(startPose);
         buildPaths();
 
         StateMachine machine = new StateMachineBuilder()
-                //good
                 .state(PathState.DRIVE_START_POS_SHOOT_POS)
                 .onEnter( () -> {
                     follower.followPath(driveStartPosShootPos, true);
@@ -275,363 +254,191 @@ public class Red_Sort_Auto extends LinearOpMode {
                 })
                 .transition( () -> !follower.isBusy() && follower.atPose(scanShootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_PRE)
 
-
-                //good
                 .state(PathState.SHOOT_PRE)
                 .loop( () -> {
                     shooting = true;
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.SET_UP2)
-
+                .transitionTimed(2.5, PathState.SET_UP2)
 
                 .state(PathState.SET_UP2)
                 .onEnter( () -> {
-                    shooting = false;
                     follower.followPath(setUpTwo, true);
                 })
                 .loop( () -> {
-                    shooting = false;
+                    gate.setPosition(Gate.CLOSE);
                     intaking = true;
-                    if (sortID == 22) { rail.setPosition(Rail.INDEX); }
-
                 })
-                .transition( () -> !follower.isBusy(), PathState.SPIKE_TWO)
-
+                .transition( () -> follower.atPose(setUp2, 0.5, 0.5, Math.toRadians(3)))
 
                 .state(PathState.SPIKE_TWO)
                 .onEnter( () -> {
                     follower.followPath(spikeTwo, true);
-                    intake.setAllPower(1);
                 })
                 .loop( () -> {
                     intaking = true;
-                    indexing = true;
                 })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT2)
-                .transitionTimed(3.5, PathState.RETURN_SHOOT2)
-
+                .transition( () -> follower.atPose(spike2, 0.5, 0.5, Math.toRadians(3)) || ballCount == 3, PathState.RETURN_SHOOT2)
 
                 .state(PathState.RETURN_SHOOT2)
                 .onEnter( () -> {
-                    follower.followPath(returnToShoot2, true);
                     intaking = false;
-
+                    shooting = true;
+                    follower.followPath(returnToShoot2, true);
                 })
                 .loop( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    switch((int) sortID) {
+                    intake.setAllPower(0);
+                    switch((int)sortID) {
                         case(21):
-                            if (Objects.equals(topSensor.getColor(), "PURPLE")) {
-                                intake.setAllPower(0);
-                                rail.setPosition(Rail.INDEX);
-                            }
-                            else {
-                                intake.setAllPower(0);
-                            }
-                            break;
-                        case (22):
-                            intake.setAllPower(0);
-                            break;
-                        case (23):
                             rail.setPosition(Rail.INDEX);
-                            timer1.resetTimer();
-                            //if(timer1.getElapsedTime() > 500 && shooting) {
-                                intake.setAllPower(1);
-                                //timer1.resetTimer();
-                                //if (timer1.getElapsedTime() >= 200) {
-                                    rail.setPosition(Rail.INLINE);
-                                //}
+                            break;
+                        case(22):
+                            break;
+                        case(23):
+                            break;
+                        default:
+                            break;
                     }
+                    gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_TWO)
-
+                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(3)), PathState.SHOOT_TWO)
 
                 .state(PathState.SHOOT_TWO)
-                .loop( () -> {
+                .onEnter( () -> {
                     shooting = true;
-                    intake.setAllPower(0.4);
+                })
+                .loop( () -> {
                     if (ballCount >= 1) {
-                        intake.setAllPower(1);
+                        intake.setAllPower(0.4);
                     }
-                    if (ballCount == 0) {
+                    if (ballCount == 0 && (int)sortID == 21) {
+                        intake.setAllPower(0);
                         rail.setPosition(Rail.INLINE);
                     }
-//                    intake.setAllPower(1)
                 })
                 .transitionTimed(shootTime, PathState.SET_UP3)
 
 
+
                 .state(PathState.SET_UP3)
                 .onEnter( () -> {
-                    intake.setAllPower(0);
-                    shooting = false;
+                    shooting=false;
                     follower.followPath(setUpThree, true);
                 })
                 .loop( () -> {
-                    shooting = false;
-                    intaking = true;
-                    intake.setAllPower(1);
+                    gate.setPosition(Gate.CLOSE);
+                    intaking=true;
                 })
-                .transition( () -> !follower.isBusy(), PathState.SPIKE_THREE)
-
+                .transition( () -> follower.atPose(setUp3, 0.5, 0.5, Math.toRadians(3)), PathState.SPIKE_THREE)
 
                 .state(PathState.SPIKE_THREE)
                 .onEnter( () -> {
                     follower.followPath(spikeThree, true);
-                    intake.setAllPower(1);
                 })
                 .loop( () -> {
                     intaking = true;
                 })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT3)
-                .transitionTimed(3, PathState.RETURN_SHOOT3)
-
+                .transition( () -> follower.atPose(spike3, 0.5, 0.5, Math.toRadians(3)) || ballCount == 3, PathState.RETURN_SHOOT3)
 
                 .state(PathState.RETURN_SHOOT3)
                 .onEnter( () -> {
+                    intaking=false;
+                    shooting=true;
                     follower.followPath(returnToShoot3, true);
-                    intaking = false;
                 })
                 .loop( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    switch((int) sortID) {
+                    intake.setAllPower(0);
+                    switch((int)sortID) {
                         case(21):
-                            intake.setAllPower(0);
                             break;
-                        case 22 :
-                            if (Objects.equals(topSensor.getColor(), "GREEN")) {
-                                rail.setPosition(Rail.INDEX);
-                                intake.setAllPower(0);
-                            }
-                            else {
-                                intake.setAllPower(0);
-                            }
-                        case 23 :
+                        case(22):
                             rail.setPosition(Rail.INDEX);
-                            intake.setAllPower(1);
-                            rail.setPosition(Rail.INLINE);
-
+                            break;
+                        case(23):
+                            rail.setPosition(Rail.INDEX);
+                            break;
+                        default:
+                            break;
 
                     }
+                    gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_THREE)
+                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(3)), PathState.SHOOT_THREE)
 
 
                 .state(PathState.SHOOT_THREE)
-                .loop( () -> {
+                .onEnter( () -> {
                     shooting = true;
-                    if (sortID == 22) {
-                        rail.setPosition(Rail.INDEX);
-                        intake.setRollerPower(1);
-                        if (ballCount==1 && topSensor.hasBall() != 1) {
+                })
+                .loop( () -> {
+                    intake.setRollerPower(0.4);
+                    if (sortID == 21) {intake.setAllPower(0.4);}
+                    if (ballCount == 1 && (int)sortID == 23) {
+                        intake.setAllPower(1);
+                        if(ballCount == 0) {
                             rail.setPosition(Rail.INLINE);
                         }
                     }
-                    else {
-                        intaking = false;
+                    else if((int)sortID == 22 && ballCount == 1) {
                         intake.setAllPower(1);
-                        rail.setPosition(Rail.INLINE);
+                        if(ballCount == 0) {
+                            rail.setPosition(Rail.INLINE);
+                        }
+                    }
+                    else if (ballCount == 0) {
+                        intake.setAllPower(1);
                     }
                 })
                 .transitionTimed(shootTime, PathState.SPIKE_ONE)
 
-
-
-/*
-                .state(PathState.GINTAKE_SETUP)
-                .onEnter( () -> {
-                    shooting = false;
-                    follower.followPath(gintakeSetup, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-                    intaking = false;
-                })
-                .transition( () -> !follower.isBusy(), PathState.GINTAKE)
-*/
-                .state(PathState.GINTAKE)
-                .onEnter( () -> {
-                    shooting = false;
-                    gate.setPosition(Gate.CLOSE);
-                    follower.followPath(gintake, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-
-                    gate.setPosition(Gate.CLOSE);
-                    intaking = true;
-                })
-                .transitionTimed(1, PathState.IDLE_GATE)
-
-
-                .state(PathState.IDLE_GATE)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                })
-                .loop( () -> {
-                    intaking = true;
-                })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE)
-                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE)
-
-
-                .state(PathState.GINTAKE_AWAY)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    intaking = false;
-                    follower.followPath(gintakeAway, true);
-                })
-                .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE)
-
-
-                .state(PathState.RETURN_SHOOT_GINTAKE)
-                .onEnter( () -> {
-                    shooting = true;
-                    follower.followPath(returnToShootGintake, true);
-                    intake.setAllPower(0);
-                    intaking = false;
-                })
-                .loop( () -> {
-                    shooting = true;
-                    intaking = false;
-                    gate.setPosition(Gate.OPEN);
-                })
-                .transition( () -> !follower.isBusy() && follower.atPose(shootPose, 1, 1, Math.toRadians(5)), PathState.GINTAKE_SHOOT)
-
-
-                .state(PathState.GINTAKE_SHOOT)
-                .loop( () -> {
-                    shooting = true;
-                    gate.setPosition(Gate.OPEN);
-                    intaking = false;
-                    intake.setAllPower(1);
-                })
-                .transitionTimed(shootTime, PathState.GINTAKE2)
-
-
-                .state(PathState.GINTAKE2)
-                .onEnter( () -> {
-                    shooting = false;
-                    gate.setPosition(Gate.CLOSE);
-                    follower.followPath(gintake, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-
-                    gate.setPosition(Gate.CLOSE);
-                    intaking = true;
-                })
-                .transitionTimed(1, PathState.IDLE_GATE2)
-
-
-                .state(PathState.IDLE_GATE2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                })
-                .loop( () -> {
-                    intaking = true;
-                })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE2)
-                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE2)
-
-
-                .state(PathState.GINTAKE_AWAY2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    intaking = false;
-                    follower.followPath(gintakeAway, true);
-                })
-                .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE2)
-
-
-                .state(PathState.RETURN_SHOOT_GINTAKE2)
-                .onEnter( () -> {
-                    shooting = true;
-                    follower.followPath(returnToShootGintake, true);
-                    intake.setAllPower(0);
-                    intaking = false;
-                })
-                .loop( () -> {
-                    shooting = true;
-                    intaking = false;
-                    gate.setPosition(Gate.OPEN);
-                })
-                .transition( () -> !follower.isBusy()
-                                && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
-                        , PathState.GINTAKE_SHOOT2)
-
-
-                .state(PathState.GINTAKE_SHOOT2)
-                .loop( () -> {
-                    shooting = true;
-                    gate.setPosition(Gate.OPEN);
-                    intaking = false;
-                    intake.setAllPower(1);
-                })
-                .transitionTimed(shootTime, PathState.SPIKE_ONE)
 
 
                 .state(PathState.SPIKE_ONE)
                 .onEnter( () -> {
-                    shooting = false;
-                    intaking = true;
+                    shooting=false;
+                    intaking=true;
                     follower.followPath(spikeOne, true);
                 })
                 .loop( () -> {
+                    gate.setPosition(Gate.CLOSE);
                     intaking = true;
                 })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT1)
-                .transitionTimed(3, PathState.RETURN_SHOOT1)
-
+                .transition( () -> follower.atPose(spike1, 0.5, 0.5, Math.toRadians(3)) || ballCount == 3, PathState.RETURN_SHOOT2)
 
                 .state(PathState.RETURN_SHOOT1)
                 .onEnter( () -> {
+                    intaking=false;
                     follower.followPath(returnToShoot1, true);
-                    intaking = false;
                 })
                 .loop( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    switch((int) sortID) {
+                    intake.setAllPower(0);
+                    switch((int)sortID) {
                         case(21):
-                            intake.setAllPower(0);
                             break;
-                        case 22 :
-                            if (Objects.equals(topSensor.getColor(), "GREEN")) {
-                                rail.setPosition(Rail.INDEX);
-                                intake.setAllPower(0);
-                            }
-                            else { intake.setAllPower(0);}
-                            break;
-                        case 23 :
+                        case(22):
                             rail.setPosition(Rail.INDEX);
-                            //timer1.resetTimer();
-                            //if(timer1.getElapsedTime() > 500 && shooting) {
-                                intake.setAllPower(1);
-                                //timer1.resetTimer();
-                              //  if (timer1.getElapsedTime() >= 200) {
-                                    rail.setPosition(Rail.INLINE);
-                                //}
-
+                            break;
+                        case(23):
+                            break;
+                        default:
+                            break;
                     }
+                    gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> !follower.isBusy() && follower.atPose(lastShootPose, 1, 1, Math.toRadians(5)), PathState.SHOOT_ONE)
-
+                .transition( () -> follower.atPose(lastShootPose, 0.5, 0.5, Math.toRadians(3)), PathState.SHOOT_ONE)
 
                 .state(PathState.SHOOT_ONE)
-                .loop( () -> {
+                .onEnter( () -> {
                     shooting = true;
-                    intake.setAllPower(.3);
-                    if (ballCount == 0) {
-                        rail.setPosition(Rail.INLINE);
-                        intake.setAllPower(1);
-                    }
-                    intaking = false;
-                    rail.setPosition(Rail.INDEX);
-//                    intake.setAllPower(1);
                 })
-
+                .loop( () -> {
+                    intake.setAllPower(0.4);
+                    if (ballCount == 0 && (int)sortID == 22) {
+                        intake.setAllPower(1);
+                        rail.setPosition(Rail.INLINE);
+                    }
+                })
 
 
                 .build();
@@ -639,15 +446,12 @@ public class Red_Sort_Auto extends LinearOpMode {
 
 
         waitForStart();
-        shooter.setVelocity(1440);
         machine.start();
-
-        opModeTimer.resetTimer();
         Turret.tracking = true;
-        hood.setHoodPosition(.60);
+        hood.setHoodPosition(.55);
         rail.setPosition(Rail.INLINE);
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
-        shooter.setVelocity(1440);
+        shooter.setVelocity(1460);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -663,13 +467,6 @@ public class Red_Sort_Auto extends LinearOpMode {
             follower.update();
             machine.update();
             intakeBalls();
-            if (indexing) {
-                switch((int) sortID) {
-                    case 21 : indexer.GPP(shooting);
-                    case 22 : indexer.PGP(shooting);
-                    case 23 : indexer.PPG(shooting);
-                }
-            }
 
             ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
             shooter.update();
@@ -698,10 +495,10 @@ public class Red_Sort_Auto extends LinearOpMode {
             telemetry.addData("middleSensor", middleSensor.getColor());
             telemetry.addData("bottomSensor", bottomSensor.getColor());
             telemetry.addData("ball count", ballCount);
-            telemetry.addData("gintakeCount", gintakeCount);
-            telemetry.addData("timer", timer1);
 
             telemetry.update();
+
         }
     }
 }
+
