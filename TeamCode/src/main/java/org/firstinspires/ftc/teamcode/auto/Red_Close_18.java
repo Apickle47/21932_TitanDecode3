@@ -80,7 +80,7 @@ public class Red_Close_18 extends LinearOpMode {
     private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90));
     private final Pose humanPose = new Pose(130,7, Math.toRadians(-90));
     private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0);
-    private final Pose gintakePose = new Pose(130.51, 59.58, 0.4560);  //1 degree = 0.01745329251994329576923690768489 rad
+    private final Pose gintakePose = new Pose(140.51, 59.58, 0.4860);  //1 degree = 0.01745329251994329576923690768489 rad
     private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90));
     private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90));
 
@@ -107,9 +107,9 @@ public class Red_Close_18 extends LinearOpMode {
                 .addPath(new BezierLine(spike1, lastShootPose))
                 .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpTwo = follower.pathBuilder()
                 .addPath(new BezierLine(PreshootPose, setUp2))
@@ -126,8 +126,8 @@ public class Red_Close_18 extends LinearOpMode {
                 .addPath(new BezierLine(spike2, shootPose))
                 .setLinearHeadingInterpolation(spike2.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.25))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.25))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpThree = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUp3))
@@ -158,8 +158,8 @@ public class Red_Close_18 extends LinearOpMode {
                 .addPath(new BezierLine(humanPose, shootPose))
                 .setLinearHeadingInterpolation(humanPose.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         gintakeSetup = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, gintakeAwayPose1))
@@ -170,8 +170,8 @@ public class Red_Close_18 extends LinearOpMode {
                 .addPath(new BezierLine(gintakeAwayPose1, gintakePose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), gintakePose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.4))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.4))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         gintakeAway = follower.pathBuilder()
                 .addPath(new BezierLine(gintakePose, gintakeAwayPose1))
@@ -183,8 +183,8 @@ public class Red_Close_18 extends LinearOpMode {
                 .addPath(new BezierLine(gintakeAwayPose1, shootPose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.2))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.2))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
 
     }
@@ -254,7 +254,7 @@ public class Red_Close_18 extends LinearOpMode {
                 .onEnter( () -> {
                     hood.setHoodPosition(0.55);
                     shooter.setVelocity(1500);
-                    turret.setAngleOffset(4);
+                    //turret.setAngleOffset(4);
                     follower.followPath(driveStartPosShootPos, true);
                     shooting=true;
                 })
@@ -270,7 +270,7 @@ public class Red_Close_18 extends LinearOpMode {
                 .state(PathState.SET_UP2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
-                    turret.setAngleOffset(-4);
+                    //turret.setAngleOffset(-4);
                     shooter.setVelocity(1480);
                     shooting = false;
                     follower.followPath(setUpTwo, true);
@@ -369,7 +369,7 @@ public class Red_Close_18 extends LinearOpMode {
 
                 .state(PathState.GINTAKE_SHOOT)
                 .onEnter( () -> {
-                    turret.setAngleOffset(-4);
+                    //turret.setAngleOffset(-4);
                 })
                 .loop( () -> {
                     shooting = true;
@@ -440,7 +440,7 @@ public class Red_Close_18 extends LinearOpMode {
 
                 .state(PathState.SET_UP3)
                 .onEnter( () -> {
-                    turret.setAngleOffset(4);
+                    //turret.setAngleOffset(4);
                     shooting = false;
                     follower.followPath(setUpThree, true);
                 })
@@ -499,7 +499,7 @@ public class Red_Close_18 extends LinearOpMode {
 
                 .state(PathState.RETURN_SHOOT1)
                 .onEnter( () -> {
-                    turret.setAngleOffset(-2);
+                    //turret.setAngleOffset(-2);
                     shooter.setVelocity(1480); //TODO: MADE A VEL DECREASE BY 10 (UNTESTED)
                     follower.followPath(returnToShoot1, true);
                     intaking = false;

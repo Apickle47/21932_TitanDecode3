@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import java.util.List;
 
 @Autonomous
-public class Red_Close_Sync_Auto extends LinearOpMode {
+public class Blue_Close_18 extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -61,26 +61,28 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
 
 
     public enum PathState {
-        DRIVE_START_POS_SHOOT_POS, SHOOT_PRE, SPIKE_ONE, RETURN_SHOOT1, SHOOT_ONE, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SHOOT_TWO, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, GINTAKE_SHOOT, GINTAKE_AWAY2, GINTAKE2, RETURN_SHOOT_GINTAKE2, GINTAKE_SHOOT2, GINTAKE_SETUP, DONE, IDLE_SHOOT, IDLE_GATE, IDLE_GATE2, HIT_GATE1, HIT_GATE2
+        DRIVE_START_POS_SHOOT_POS, SHOOT_PRE, SPIKE_ONE, RETURN_SHOOT1, SHOOT_ONE, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SHOOT_TWO, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, GINTAKE_SHOOT, GINTAKE_AWAY2, GINTAKE2, RETURN_SHOOT_GINTAKE2, GINTAKE_SHOOT2, GINTAKE_SETUP, DONE, IDLE_SHOOT, IDLE_GATE, IDLE_GATE2, HIT_GATE1, HIT_GATE2, SHOOT_THREE
     }
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(117.771,126.922, Math.toRadians(38.937));
-    private final Pose shootPose = new Pose(85.8,75.24, 0);
-    private final Pose lastShootPose = new Pose(84,109, 0);
-    private final Pose PreshootPose = new Pose(85.8,75.24, Math.toRadians(38.937));
-    private final Pose spike1 = new Pose(126.7, 84.14, Math.toRadians(0));
-    private final Pose setUp2 = new Pose(95, 57.3, Math.toRadians(0));
-    private final Pose spike2 = new Pose(120.5,58.2,Math.toRadians(0));
-    private final Pose setUp3 = new Pose(128,68.6, Math.toRadians(-90));
-    private final Pose spike3 = new Pose(128, 35, Math.toRadians(0));
-    private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90));
-    private final Pose humanPose = new Pose(130,7, Math.toRadians(-90));
-    private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0);
-    private final Pose gintakePose = new Pose(130, 59.58, 0.5060);  //1 degree = 0.01745329251994329576923690768489 rad
-    private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90));
-    private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90));
+    private final Pose startPose = new Pose(117.771,126.922, Math.toRadians(38.937)).mirror();
+    private final Pose scanShootPose = new Pose(85.8,75.24, Math.toRadians(90)).mirror();
+    private final Pose PreshootPose = new Pose(85.8,75.24, Math.toRadians(38.937)).mirror();
+    private final Pose shootPose = new Pose(85.8,75.24, 0).mirror();
+
+    private final Pose lastShootPose = new Pose(84,109, 0).mirror();
+    private final Pose spike1 = new Pose(132.7, 84.14, Math.toRadians(0)).mirror();
+    private final Pose setUp2 = new Pose(95, 58.2, Math.toRadians(0)).mirror();
+    private final Pose spike2 = new Pose(135.5,58.2,Math.toRadians(0)).mirror();
+    private final Pose setUp3 = new Pose(95,35, Math.toRadians(0)).mirror();
+    private final Pose spike3 = new Pose(140, 35, Math.toRadians(0)).mirror();
+    private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90)).mirror();
+    private final Pose humanPose = new Pose(130,7, Math.toRadians(-90)).mirror();
+    private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0).mirror();
+    private final Pose gintakePose = new Pose(140.51, 59.58, 0.4860).mirror();  //1 degree = 0.01745329251994329576923690768489 rad
+    private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90)).mirror();
+    private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90)).mirror();
 
 
     private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman, gintakeAway, gintake, returnToShootGintake, gintakeSetup;
@@ -97,9 +99,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 .build();
         spikeOne = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, spike1))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), spike1.getHeading())
-                //.addPath(new BezierLine(spike1, hitGate))
-                //.setLinearHeadingInterpolation(spike2.getHeading(), hitGate.getHeading())
+                .setConstantHeadingInterpolation(spike1.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
 
@@ -107,30 +107,27 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 .addPath(new BezierLine(spike1, lastShootPose))
                 .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpTwo = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, setUp2))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), setUp2.getHeading())
+                .addPath(new BezierLine(PreshootPose, setUp2))
+                .setLinearHeadingInterpolation(startPose.getHeading(), setUp2.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
 
         spikeTwo = follower.pathBuilder()
                 .addPath(new BezierLine(setUp2,spike2))
                 .setLinearHeadingInterpolation(setUp2.getHeading(), spike2.getHeading())
-                .addPath(new BezierLine(spike2, hitGateRev))
-                .setLinearHeadingInterpolation(spike2.getHeading(), hitGateRev.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         returnToShoot2 = follower.pathBuilder()
-                .addPath(new BezierLine(hitGateRev, shootPose))
-                .setLinearHeadingInterpolation(hitGateRev.getHeading(), shootPose.getHeading())
+                .addPath(new BezierLine(spike2, shootPose))
+                .setLinearHeadingInterpolation(spike2.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.25))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpThree = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUp3))
@@ -144,10 +141,8 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 .build();
         returnToShoot3 = follower.pathBuilder()
                 .addPath(new BezierLine(spike3, shootPose))
-                .setLinearHeadingInterpolation(spike3.getHeading(), shootPose.getHeading())
+                .setConstantHeadingInterpolation(-Math.PI/6)//TODO: DELETE IF DOESNT WORK
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpHuman = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUpH))
@@ -163,8 +158,8 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 .addPath(new BezierLine(humanPose, shootPose))
                 .setLinearHeadingInterpolation(humanPose.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         gintakeSetup = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, gintakeAwayPose1))
@@ -174,10 +169,9 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
         gintake = follower.pathBuilder()
                 .addPath(new BezierLine(gintakeAwayPose1, gintakePose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), gintakePose.getHeading())
-                .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), gintakePose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.4))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.4))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         gintakeAway = follower.pathBuilder()
                 .addPath(new BezierLine(gintakePose, gintakeAwayPose1))
@@ -189,8 +183,8 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 .addPath(new BezierLine(gintakeAwayPose1, shootPose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), shootPose.getHeading())
                 .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                .addParametricCallback(.85, () -> follower.setMaxPower(0.5))
-                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                //.addParametricCallback(.85, () -> follower.setMaxPower(0.2))
+                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
 
     }
@@ -240,7 +234,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
 
         util = new Util();
         shooter = new Mortar(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(40.937)));
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(38.937)));
         intake = new Intake(hardwareMap, util.deviceConf);
         gate = new Gate(hardwareMap, util.deviceConf);
         hood = new Hood(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(38.937)));
@@ -250,17 +244,17 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
 
-        turret.setBasketPos(Turret.redBasket);
+        turret.setBasketPos(Turret.blueBasket);
         follower.setPose(startPose);
         buildPaths();
 
         StateMachine machine = new StateMachineBuilder()
                 //good
-                .state(Red_Close_18.PathState.DRIVE_START_POS_SHOOT_POS)
+                .state(PathState.DRIVE_START_POS_SHOOT_POS)
                 .onEnter( () -> {
                     hood.setHoodPosition(0.55);
                     shooter.setVelocity(1500);
-                    turret.setAngleOffset(4);
+                    //turret.setAngleOffset(4);
                     follower.followPath(driveStartPosShootPos, true);
                     shooting=true;
                 })
@@ -269,22 +263,14 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                     shooter.setVelocity(1500);
                     gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> follower.atPose(PreshootPose, 1, 1, Math.toRadians(6)), Red_Close_18.PathState.SET_UP2)
-
-                //good
-                .state(PathState.SHOOT_PRE)
-                .loop( () -> {
-                    shooting = true;
-                    intaking = false;
-                    intake.setAllPower(1);
-                })
-                .transitionTimed(shootTime, PathState.SET_UP2)
+                .transition( () -> follower.atPose(PreshootPose, 1, 1, Math.toRadians(6)), PathState.SET_UP2)
 
 
-                .state(Red_Close_18.PathState.SET_UP2)
+
+                .state(PathState.SET_UP2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
-                    turret.setAngleOffset(-4);
+                    //turret.setAngleOffset(-4);
                     shooter.setVelocity(1480);
                     shooting = false;
                     follower.followPath(setUpTwo, true);
@@ -295,18 +281,18 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                     shooting = false;
                     intaking = false;
                 })
-                .transition( () -> follower.atPose(setUp2, 0.5, 0.5, Math.toRadians(5)), Red_Close_18.PathState.SPIKE_TWO)
+                .transition( () -> follower.atPose(setUp2, 0.5, 0.5, Math.toRadians(5)), PathState.SPIKE_TWO)
 
-                .state(Red_Close_18.PathState.SPIKE_TWO)
+                .state(PathState.SPIKE_TWO)
                 .onEnter( () -> {
                     follower.followPath(spikeTwo, true);
                 })
                 .loop( () -> {
                     intaking = true;
                 })
-                .transition( () -> ballCount == 3 || follower.atPose(spike2, 0.5, 0.5, Math.toRadians(5)), Red_Close_18.PathState.RETURN_SHOOT2)
+                .transition( () -> ballCount == 3 || follower.atPose(spike2, 0.5, 0.5, Math.toRadians(5)), PathState.RETURN_SHOOT2)
 
-                .state(Red_Close_18.PathState.RETURN_SHOOT2)
+                .state(PathState.RETURN_SHOOT2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.OPEN);
                     follower.followPath(returnToShoot2, true);
@@ -319,29 +305,18 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 .onExit( () -> {
                     gate.setPosition(Gate.CLOSE);
                 })
-                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), Red_Close_18.PathState.SHOOT_TWO)
+                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.SHOOT_TWO)
 
-                .state(Red_Close_18.PathState.SHOOT_TWO)
+                .state(PathState.SHOOT_TWO)
                 .loop( () -> {
                     gate.setPosition(Gate.OPEN);
                     shooting = true;
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(1, Red_Close_18.PathState.GINTAKE)
+                .transitionTimed(1, PathState.GINTAKE)
 
-/*
-                .state(PathState.GINTAKE_SETUP)
-                .onEnter( () -> {
-                    shooting = false;
-                    follower.followPath(gintakeSetup, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-                    intaking = false;
-                })
-                .transition( () -> !follower.isBusy(), PathState.GINTAKE)
-*/
+
                 .state(PathState.GINTAKE)
                 .onEnter( () -> {
                     shooting = false;
@@ -356,6 +331,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 })
                 .transitionTimed(1, PathState.IDLE_GATE)
 
+
                 .state(PathState.IDLE_GATE)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
@@ -364,40 +340,45 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                     intaking = true;
                 })
                 .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE)
-                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE)
+                .transitionTimed(2, PathState.RETURN_SHOOT_GINTAKE)
+
 
                 .state(PathState.GINTAKE_AWAY)
                 .onEnter( () -> {
                     gate.setPosition(Gate.OPEN);
-                    intaking = false;
+                    intaking = true;
                     follower.followPath(gintakeAway, true);
                 })
                 .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE)
+
 
                 .state(PathState.RETURN_SHOOT_GINTAKE)
                 .onEnter( () -> {
                     shooting = true;
                     follower.followPath(returnToShootGintake, true);
                     intake.setAllPower(0);
-                    intaking = false;
+                    intaking = true;
                 })
                 .loop( () -> {
                     shooting = true;
                     intaking = false;
                     gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> !follower.isBusy()
-                        && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
-                        , PathState.GINTAKE_SHOOT)
+                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.GINTAKE_SHOOT)
+
 
                 .state(PathState.GINTAKE_SHOOT)
+                .onEnter( () -> {
+                    //turret.setAngleOffset(-4);
+                })
                 .loop( () -> {
                     shooting = true;
                     gate.setPosition(Gate.OPEN);
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.GINTAKE2)
+                .transitionTimed(shootTime, PathState.SET_UP3)
+
 
                 .state(PathState.GINTAKE2)
                 .onEnter( () -> {
@@ -413,6 +394,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 })
                 .transitionTimed(1, PathState.IDLE_GATE2)
 
+
                 .state(PathState.IDLE_GATE2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
@@ -421,33 +403,79 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                     intaking = true;
                 })
                 .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE2)
-                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE2)
+                .transitionTimed(2, PathState.RETURN_SHOOT_GINTAKE2)
+
 
                 .state(PathState.GINTAKE_AWAY2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.OPEN);
-                    intaking = false;
+                    intaking = true;
                     follower.followPath(gintakeAway, true);
                 })
                 .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE2)
 
                 .state(PathState.RETURN_SHOOT_GINTAKE2)
                 .onEnter( () -> {
-                    shooting = true;
                     follower.followPath(returnToShootGintake, true);
                     intake.setAllPower(0);
-                    intaking = false;
+                    shooting=true;
+                    gate.setPosition(Gate.OPEN);
+                    intaking = true;
                 })
                 .loop( () -> {
-                    shooting = true;
-                    intaking = false;
+                    intaking = true;
                     gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> !follower.isBusy()
-                                && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
-                        , PathState.GINTAKE_SHOOT2)
+                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.GINTAKE_SHOOT2)
 
                 .state(PathState.GINTAKE_SHOOT2)
+                .loop( () -> {
+                    shooting = true;
+                    gate.setPosition(Gate.OPEN);
+                    intaking = false;
+                    intake.setAllPower(1);
+                })
+                .transitionTimed(shootTime, PathState.SET_UP3)
+
+
+                .state(PathState.SET_UP3)
+                .onEnter( () -> {
+                    //turret.setAngleOffset(4);
+                    shooting = false;
+                    follower.followPath(setUpThree, true);
+                })
+                .loop( () -> {
+                    shooting = false;
+                    intaking = false;
+                })
+                .transition( () -> !follower.isBusy(), PathState.SPIKE_THREE)
+
+                .state(PathState.SPIKE_THREE)
+                .onEnter( () -> {
+                    intaking = true;
+                    follower.followPath(spikeThree, true);
+                })
+                .loop( () -> {
+                    intaking = true;
+                })
+                .transition( () -> follower.atPose(spike3, 1, 1, Math.toRadians(5)) || ballCount == 3, PathState.RETURN_SHOOT3)
+
+
+                .state(PathState.RETURN_SHOOT3)
+                .onEnter( () -> {
+                    follower.followPath(returnToShoot3, true);
+                })
+                .loop( () -> {
+                    intaking = false;
+                    shooting = false;
+                })
+                .transition( () -> follower.atPose(shootPose, 1, 1), PathState.SHOOT_THREE)
+
+
+                .state(PathState.SHOOT_THREE)
+                .onEnter( () -> {
+                    shooting = true;
+                })
                 .loop( () -> {
                     shooting = true;
                     gate.setPosition(Gate.OPEN);
@@ -464,36 +492,25 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                 })
                 .loop( () -> {
                     intaking = true;
-                    shooter.setVelocity(1370);
                 })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT1)
-                .transitionTimed(3, PathState.RETURN_SHOOT1)
+                .transitionTimed(2, PathState.RETURN_SHOOT1)
+                .transition( () -> ballCount == 3 || follower.atPose(spike1, 1, 1), PathState.RETURN_SHOOT1)
 
 
                 .state(PathState.RETURN_SHOOT1)
                 .onEnter( () -> {
-                    //hood.setHoodPosition(.6);
-                    shooter.setVelocity(1370);
+                    //turret.setAngleOffset(-2);
+                    shooter.setVelocity(1480); //TODO: MADE A VEL DECREASE BY 10 (UNTESTED)
                     follower.followPath(returnToShoot1, true);
                     intaking = false;
                 })
                 .loop( () -> {
                     gate.setPosition(Gate.OPEN);
-                    //hood.setHoodPosition(.6);
-                    shooter.setVelocity(1370);
                 })
-                .transition( () -> !follower.isBusy()
-                        && follower.atPose(lastShootPose, 1, 1, Math.toRadians(5))
-                        , PathState.SHOOT_ONE)
+                .transition( () -> follower.atPose(lastShootPose, .5, .5), PathState.SHOOT_ONE)
 
                 .state(PathState.SHOOT_ONE)
-                .onEnter( () -> {
-                    hood.setHoodPosition(.55);
-                    shooter.setVelocity(1370);
-                })
                 .loop( () -> {
-                    hood.setHoodPosition(.55);
-                    shooter.setVelocity(1370);
                     shooting = true;
                     intaking = false;
                     intake.setAllPower(1);
@@ -506,15 +523,15 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
 
 
         waitForStart();
-        shooter.setVelocity(1480);
+        //shooter.setVelocity(1485);
         machine.start();
 
         opModeTimer.resetTimer();
         Turret.tracking = true;
+        hood.setHoodPosition(.60);
         rail.setPosition(Rail.INDEX);
         //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
-        time1.reset();
-        shooter.setVelocity(1480);
+        //shooter.setVelocity(1485);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);

@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.MiddleSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Mortar;
 import org.firstinspires.ftc.teamcode.subsystems.Rail;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterTable;
 import org.firstinspires.ftc.teamcode.subsystems.Signal;
 import org.firstinspires.ftc.teamcode.subsystems.Tilt;
 import org.firstinspires.ftc.teamcode.subsystems.TopSensor;
@@ -56,6 +57,7 @@ public class NewRedTeleOp extends OpMode {
     Pose pose;
     ElapsedTime myStopwatch = new ElapsedTime();
     TelemetryManager telemetryM;
+    ShooterTable shooterTable;
     private double time;
 
 
@@ -74,6 +76,7 @@ public class NewRedTeleOp extends OpMode {
     double[] intakeLightSequence = {0.28, 0.32, 0.36, 0.62};
     double[] StorageLightSequence = {1.0, 0.71, 0.5};
     double goalDist = Math.sqrt(Math.pow(72, 2) + Math.pow(72, 2));
+    double goalDistMeters = goalDist / 39.37;
 
     // Add more light sequences here if needed
 
@@ -122,8 +125,10 @@ public class NewRedTeleOp extends OpMode {
         pose = turret.getPose();
         topColor = topSensor.hasBall();
         goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
-        hood.hoodIncrement(0.05 * incCount, goalDist > 115 ? Hood.farHood : Hood.closeHood);
-        shooterTargetVel = shooter.calcVelocity(goalDist);
+        goalDistMeters = goalDist / 39.37;
+        hood.hoodIncrement(0.025 * incCount, hood.calcHoodPos(goalDistMeters));
+        shooterTargetVel = (int) shooter.calcFlywheel(hood.getLaunchAngle(goalDistMeters), goalDistMeters);
+        //shooterTargetVel = shooter.calcVelocity(goalDist);
 
 
         //  ---  CONTROLS  ---
@@ -325,6 +330,7 @@ public class NewRedTeleOp extends OpMode {
         telemetryM.addLine("");
         telemetryM.addLine("SHOOTER:");
         telemetryM.addData("Shooter vel", shooter.getVelocity());
+        telemetryM.addData("exit vel:", shooter.calcExitVel(hood.getLaunchAngle(goalDist), goalDist));
         telemetryM.addData("Shooter target vel", shooter.getTargetVelocity());
     //  telemetryM.addData("Keep Shooter Running", keepShooterRunning);
    //   telemetryM.addData("Preshoot", preshoot);
@@ -332,6 +338,8 @@ public class NewRedTeleOp extends OpMode {
         telemetryM.addData("farB", Mortar.farB);
         telemetryM.addLine("");
         telemetryM.addLine("POSE:");
+        telemetryM.addData("goal distance", goalDist);
+        telemetryM.addData("goal distance meters", goalDistMeters);
         telemetryM.addData("pose x", pose.getX());
         telemetryM.addData("pose y", pose.getY());
         telemetryM.addData("pose heading", Math.toDegrees(pose.getHeading()));
@@ -345,6 +353,7 @@ public class NewRedTeleOp extends OpMode {
         telemetryM.addLine("MISC:");
         telemetryM.addData("Ball Count", ballCount);
         telemetryM.addData("hood angle", hood.getHoodPosition());
+        telemetryM.addData("launch angle:", hood.getLaunchAngle(goalDist));
         telemetryM.addData("LED Color", signal.getLEDColor());
         telemetryM.addData("Rail Position", rail.getPosition());
         telemetryM.addData("Tilt Power", servoPower);

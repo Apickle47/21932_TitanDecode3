@@ -19,7 +19,8 @@ public class Mortar {
     public static double OFF = 0, MAX = 1, NORMAL = 0.6, WAIT = 1400;
     public static double slope = 5.9343, closeB = 955, farB = 1055;
     public static double p = 200, i = 0, d = 0, f = 13;
-
+    public static double g = 9.81;
+    public static double yDistToGoal = 0.8636;
 
 
     public Mortar(HardwareMap hardwareMap, HashMap<String, String> config) {
@@ -66,6 +67,15 @@ public class Mortar {
     public double getPower() {
         return power;
     }
+
+    public double calcFlywheel(double hoodAngle, double x) {
+        return 4732.34889 * calcExitVel(hoodAngle, x) - 858.07191;
+    }
+
+    public double calcExitVel(double hoodAngle, double x) {
+        return Math.sqrt(g*x*x/(2*Math.cos(hoodAngle)*Math.cos(hoodAngle)*(x*Math.tan(hoodAngle) - yDistToGoal)));
+    }
+
 
     public void update() {
         flyMotor.setPower(power);

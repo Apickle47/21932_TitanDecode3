@@ -30,6 +30,8 @@ public class TestShooter extends LinearOpMode {
         Intake intake = new Intake(hardwareMap, util.deviceConf);
         Hood hood = new Hood(hardwareMap, util.deviceConf, new Pose(0,0,0));
         Turret.tracking = false;
+        double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
+
         turret.setBasketPos(Turret.redBasket);
         boolean color=true;
         ElapsedTime time1 = new ElapsedTime();
@@ -40,15 +42,19 @@ public class TestShooter extends LinearOpMode {
 
 
         while(opModeIsActive()) {
+            goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
             pose = turret.getPose();
             if (gamepad1.xWasPressed()) {
                 vel = 0;
             }
             if (gamepad1.dpadUpWasPressed()) {
-                vel += 20;
+                vel += 10;
             }
             if (gamepad1.dpadDownWasPressed()) {
-                vel -= 20;
+                vel -= 10;
+            }
+            if (gamepad1.aWasPressed()) {
+                vel = 1400;
             }
 
             if (gamepad1.yWasPressed()) {
@@ -132,9 +138,12 @@ public class TestShooter extends LinearOpMode {
             telemetry.addData("vel", shooter.getVelocity());
             telemetry.addData("target vel", shooter.getTargetVelocity());
             telemetry.addData("hood servo", hood.getHoodPosition());
+            telemetry.addLine();
+            telemetry.addData("distance to goal:", goalDist);
             telemetry.addData("pose x", follower.getPose().getX());
             telemetry.addData("pose y", follower.getPose().getY());
             telemetry.addData("pose heading", Math.toDegrees(follower.getPose().getHeading()));
+            telemetry.addLine();
             telemetry.addData("tracking", Turret.tracking);
             telemetry.addData("flywheel power: ", shooter.getPower());
             telemetry.update();

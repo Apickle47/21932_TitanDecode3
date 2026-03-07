@@ -16,10 +16,12 @@ public class Hood {
     public static boolean tracking = false;
     private double pos;
 
-    public static double minHood = .97, maxHood = .35, closeHood = .6, farHood = .45;
+    public static double minHood = 1, maxHood = .35, closeHood = .6, farHood = .45;
     private static Pose pose;
     public static boolean TEST = false;
     public static double dist;
+    public static double yDistToGoal = 0.8636;
+    public static double trajAngle = Math.toRadians(0);
 
     public Hood(HardwareMap hardwareMap, HashMap<String, String> config, Pose startPos) {
         pose = startPos;
@@ -53,6 +55,14 @@ public class Hood {
         else {
             this.pos = maxHood;
         }
+    }
+
+    public double calcHoodPos(double x) {
+        return (((.4315 - 1)/(40.7 - 64)) * (Math.toDegrees(getLaunchAngle(x)) - 40.7)) + .4315;
+    }
+
+    public double getLaunchAngle(double x) {
+        return Math.atan(2*yDistToGoal/x - Math.tan(trajAngle));
     }
 
     public void update() {

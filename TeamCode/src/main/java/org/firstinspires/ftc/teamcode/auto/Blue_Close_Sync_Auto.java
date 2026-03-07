@@ -29,7 +29,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import java.util.List;
 
 @Autonomous
-public class Red_Close_Sync_Auto extends LinearOpMode {
+public class Blue_Close_Sync_Auto extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -66,21 +66,21 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(117.771,126.922, Math.toRadians(38.937));
-    private final Pose shootPose = new Pose(85.8,75.24, 0);
-    private final Pose lastShootPose = new Pose(84,109, 0);
-    private final Pose PreshootPose = new Pose(85.8,75.24, Math.toRadians(38.937));
-    private final Pose spike1 = new Pose(126.7, 84.14, Math.toRadians(0));
-    private final Pose setUp2 = new Pose(95, 57.3, Math.toRadians(0));
-    private final Pose spike2 = new Pose(120.5,58.2,Math.toRadians(0));
-    private final Pose setUp3 = new Pose(128,68.6, Math.toRadians(-90));
-    private final Pose spike3 = new Pose(128, 35, Math.toRadians(0));
-    private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90));
-    private final Pose humanPose = new Pose(130,7, Math.toRadians(-90));
-    private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0);
-    private final Pose gintakePose = new Pose(130, 59.58, 0.5060);  //1 degree = 0.01745329251994329576923690768489 rad
-    private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90));
-    private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90));
+    private final Pose startPose = new Pose(117.771,126.922, Math.toRadians(38.937)).mirror();
+    private final Pose shootPose = new Pose(85.8,75.24, 0).mirror();
+    private final Pose lastShootPose = new Pose(84,109, 0).mirror();
+    private final Pose PreshootPose = new Pose(85.8,75.24, Math.toRadians(38.937)).mirror();
+    private final Pose spike1 = new Pose(126.7, 84.14, Math.toRadians(0)).mirror();
+    private final Pose setUp2 = new Pose(95, 57.3, Math.toRadians(0)).mirror();
+    private final Pose spike2 = new Pose(120.5,58.2,Math.toRadians(0)).mirror();
+    private final Pose setUp3 = new Pose(128,68.6, Math.toRadians(-90)).mirror();
+    private final Pose spike3 = new Pose(128, 35, Math.toRadians(0)).mirror();
+    private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90)).mirror();
+    private final Pose humanPose = new Pose(130,7, Math.toRadians(-90)).mirror();
+    private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0).mirror();
+    private final Pose gintakePose = new Pose(131, 59.58, 0.5060).mirror();  //1 degree = 0.01745329251994329576923690768489 rad
+    private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90)).mirror();
+    private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90)).mirror();
 
 
     private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman, gintakeAway, gintake, returnToShootGintake, gintakeSetup;
@@ -250,7 +250,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
 
-        turret.setBasketPos(Turret.redBasket);
+        turret.setBasketPos(Turret.blueBasket);
         follower.setPose(startPose);
         buildPaths();
 
@@ -364,7 +364,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                     intaking = true;
                 })
                 .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE)
-                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE)
+                .transitionTimed(2.5, PathState.RETURN_SHOOT_GINTAKE)
 
                 .state(PathState.GINTAKE_AWAY)
                 .onEnter( () -> {
@@ -387,7 +387,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                     gate.setPosition(Gate.OPEN);
                 })
                 .transition( () -> !follower.isBusy()
-                        && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
+                                && follower.atPose(shootPose, 1, 1, Math.toRadians(5))
                         , PathState.GINTAKE_SHOOT)
 
                 .state(PathState.GINTAKE_SHOOT)
@@ -483,7 +483,7 @@ public class Red_Close_Sync_Auto extends LinearOpMode {
                     shooter.setVelocity(1370);
                 })
                 .transition( () -> !follower.isBusy()
-                        && follower.atPose(lastShootPose, 1, 1, Math.toRadians(5))
+                                && follower.atPose(lastShootPose, 1, 1, Math.toRadians(5))
                         , PathState.SHOOT_ONE)
 
                 .state(PathState.SHOOT_ONE)

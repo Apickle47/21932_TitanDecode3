@@ -38,7 +38,7 @@ import java.util.Objects;
 @TeleOp(name = "NewBlueTeleOp")
 public class NewBlueTeleOp extends OpMode {
 
-    public static Pose resetPose = new Pose(72,72,Math.toRadians(270) );
+    public static Pose resetPose = new Pose(116.618412, 129.0323957, 0.7080525).mirror();
     Util util = new Util();
 
     Intake intake;
@@ -86,20 +86,20 @@ public class NewBlueTeleOp extends OpMode {
     @Override
     public void init() {
         intake = new Intake(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(72, 72, (3 * Math.PI) / 2));
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(84,109, 0).mirror());
         shooter = new Mortar(hardwareMap, util.deviceConf);
         bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
         gate = new Gate(hardwareMap, util.deviceConf);
-        hood = new Hood(hardwareMap, util.deviceConf, new Pose(72, 72, (3 * Math.PI) / 2));
+        hood = new Hood(hardwareMap, util.deviceConf, new Pose(84,109, 0).mirror());
         rail = new Rail(hardwareMap, util.deviceConf);
         signal = new Signal(hardwareMap, util.deviceConf);
         tilt = new Tilt(hardwareMap, util.deviceConf);
         follower = Constants.createFollower(hardwareMap);
         Pose pose;
         ElapsedTime myStopwatch = new ElapsedTime();
-        follower.setStartingPose(new Pose(72, 72, Math.toRadians(270)));
+        follower.setStartingPose(new Pose(84,109, 0).mirror());
         //sensor.setLEDBrightness(brightness);
         follower.startTeleOpDrive(true);
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
