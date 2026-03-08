@@ -26,7 +26,7 @@ public class Turret {
     //private PinpointLocalizer localizer;
 
     public static double maxRange = Math.toRadians(355) * 108.0/96;
-    public static double x, y, heading, turretHeading, turretHeadingRelative;
+    public static double x, y, dx, dy, t = 0.9, heading, turretHeading, turretHeadingRelative;
 
     public static boolean tracking = false;
 
@@ -40,9 +40,9 @@ public class Turret {
 
     public static double angleOffset = 0;
 
-    public Turret(HardwareMap hardwareMap, HashMap<String, String> config, Pose startPos) {
+    public Turret(HardwareMap hardwareMap, HashMap<String, String> config, Pose startPos, Follower f) {
         //drive = new MecanumDrive(hardwareMap, startPos); // TODO: set this to whatever position auton will end at
-        follower = Constants.createFollower(hardwareMap);
+        follower = f;
         pose = startPos;
         servoTurret = hardwareMap.get(ServoImplEx.class, "turret");
         servoTurret2 = hardwareMap.get(ServoImplEx.class, "turret2");
@@ -63,7 +63,8 @@ public class Turret {
         curBasket = pos;
     }
     public Pose distanceToBasket() {
-        return new Pose(curBasket.getY() - y, curBasket.getX() - x);
+        follower.update();
+        return new Pose(curBasket.getX() - (follower.getPose().getX()+dx*t),curBasket.getY() - (follower.getPose().getY()+dy*t));
     }
 
     public void setPosition(double degrees) {
@@ -79,12 +80,14 @@ public class Turret {
     }
 
     public void update() {
-
-        pose = follower.getPose();
-        x = follower.getPose().getX();
-        y = follower.getPose().getY();
-        heading = pose.getHeading();
         follower.update();
+        pose = follower.getPose();
+        dx = follower.getVelocity().getXComponent();
+        dy = follower.getVelocity().getYComponent();
+        x = follower.getPose().getX() + dx * t;
+        y = follower.getPose().getY() + dy * t;
+        heading = pose.getHeading();
+
 
         turretHeadingRelative = Math.atan2(curBasket.getPose().getY() -y, curBasket.getPose().getX() -x);
         turretHeading = turretHeadingRelative - heading;

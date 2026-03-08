@@ -86,7 +86,7 @@ public class NewBlueTeleOp extends OpMode {
     @Override
     public void init() {
         intake = new Intake(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(84,109, 0).mirror());
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(84,109, 0).mirror(), follower);
         shooter = new Mortar(hardwareMap, util.deviceConf);
         bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
@@ -123,7 +123,7 @@ public class NewBlueTeleOp extends OpMode {
         topColor = topSensor.hasBall();
         goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
         hood.hoodIncrement(0.05 * incCount, goalDist > 115 ? Hood.farHood : Hood.closeHood);
-        shooterTargetVel = shooter.calcVelocity(goalDist);
+        //shooterTargetVel = shooter.calcVelocity(goalDist);
 
 
         //  ---  CONTROLS  ---

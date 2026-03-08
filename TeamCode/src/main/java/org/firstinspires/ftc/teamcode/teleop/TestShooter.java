@@ -25,16 +25,17 @@ public class TestShooter extends LinearOpMode {
         Follower follower = Constants.createFollower(hardwareMap);
         Util util = new Util();
         Mortar shooter = new Mortar(hardwareMap, util.deviceConf);
-        Turret turret = new Turret(hardwareMap, util.deviceConf, new Pose(0,0,0));
+        Turret turret = new Turret(hardwareMap, util.deviceConf, new Pose(72,72,0), follower);
         Gate gate = new Gate(hardwareMap, util.deviceConf);
         Intake intake = new Intake(hardwareMap, util.deviceConf);
-        Hood hood = new Hood(hardwareMap, util.deviceConf, new Pose(0,0,0));
+        Hood hood = new Hood(hardwareMap, util.deviceConf, new Pose(72,72,0));
+        follower.setStartingPose(new Pose(72,72, 0));
         Turret.tracking = false;
-        double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
-
-        turret.setBasketPos(Turret.redBasket);
+        double goalDist;
         boolean color=true;
         ElapsedTime time1 = new ElapsedTime();
+
+        turret.setBasketPos(Turret.blueBasket);
 
         hood.setHoodPosition(0.60);
         Pose pose;
@@ -140,9 +141,9 @@ public class TestShooter extends LinearOpMode {
             telemetry.addData("hood servo", hood.getHoodPosition());
             telemetry.addLine();
             telemetry.addData("distance to goal:", goalDist);
-            telemetry.addData("pose x", follower.getPose().getX());
-            telemetry.addData("pose y", follower.getPose().getY());
-            telemetry.addData("pose heading", Math.toDegrees(follower.getPose().getHeading()));
+            telemetry.addData("pose x", pose.getX());
+            telemetry.addData("pose y", pose.getY());
+            telemetry.addData("pose heading", Math.toDegrees(pose.getHeading()));
             telemetry.addLine();
             telemetry.addData("tracking", Turret.tracking);
             telemetry.addData("flywheel power: ", shooter.getPower());

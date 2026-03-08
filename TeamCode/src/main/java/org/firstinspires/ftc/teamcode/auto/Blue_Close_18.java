@@ -76,7 +76,7 @@ public class Blue_Close_18 extends LinearOpMode {
     private final Pose setUp2 = new Pose(95, 58.2, Math.toRadians(0)).mirror();
     private final Pose spike2 = new Pose(135.5,58.2,Math.toRadians(0)).mirror();
     private final Pose setUp3 = new Pose(95,35, Math.toRadians(0)).mirror();
-    private final Pose spike3 = new Pose(140, 35, Math.toRadians(0)).mirror();
+    private final Pose spike3 = new Pose(135, 35, Math.toRadians(0)).mirror();
     private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90)).mirror();
     private final Pose humanPose = new Pose(130,7, Math.toRadians(-90)).mirror();
     private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0).mirror();
@@ -92,7 +92,6 @@ public class Blue_Close_18 extends LinearOpMode {
         driveStartPosShootPos = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, PreshootPose))
                 .setConstantHeadingInterpolation(startPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .addParametricCallback(.5, () -> intake.setAllPower(1))
 //                .addParametricCallback(.85, () -> follower.setMaxPower(0.3))
 //                .addParametricCallback(0.99, () -> follower.setMaxPower(0.8))
@@ -100,13 +99,11 @@ public class Blue_Close_18 extends LinearOpMode {
         spikeOne = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, spike1))
                 .setConstantHeadingInterpolation(spike1.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
 
         returnToShoot1 = follower.pathBuilder()
                 .addPath(new BezierLine(spike1, lastShootPose))
                 .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
                 //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
                 //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
@@ -114,75 +111,62 @@ public class Blue_Close_18 extends LinearOpMode {
         setUpTwo = follower.pathBuilder()
                 .addPath(new BezierLine(PreshootPose, setUp2))
                 .setLinearHeadingInterpolation(startPose.getHeading(), setUp2.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
 
         spikeTwo = follower.pathBuilder()
                 .addPath(new BezierLine(setUp2,spike2))
                 .setLinearHeadingInterpolation(setUp2.getHeading(), spike2.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
         returnToShoot2 = follower.pathBuilder()
                 .addPath(new BezierLine(spike2, shootPose))
                 .setLinearHeadingInterpolation(spike2.getHeading(), shootPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 //.addParametricCallback(.85, () -> follower.setMaxPower(0.25))
                 //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpThree = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUp3))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), setUp3.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
         spikeThree = follower.pathBuilder()
                 .addPath(new BezierLine(setUp3, spike3))
                 .setLinearHeadingInterpolation(setUp3.getHeading(), spike3.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
         returnToShoot3 = follower.pathBuilder()
                 .addPath(new BezierLine(spike3, shootPose))
-                .setConstantHeadingInterpolation(-Math.PI/6)//TODO: DELETE IF DOESNT WORK
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
+                .setConstantHeadingInterpolation(-2.4917)//TODO: DELETE IF DOESNT WORK
                 .build();
         setUpHuman = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUpH))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), setUpH.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
         human = follower.pathBuilder()
                 .addPath(new BezierLine(setUpH, humanPose))
                 .setLinearHeadingInterpolation(setUpH.getHeading(), humanPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
         returnShootHuman = follower.pathBuilder()
                 .addPath(new BezierLine(humanPose, shootPose))
                 .setLinearHeadingInterpolation(humanPose.getHeading(), shootPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
                 //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         gintakeSetup = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, gintakeAwayPose1))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), gintakeAwayPose1.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
         gintake = follower.pathBuilder()
                 .addPath(new BezierLine(gintakeAwayPose1, gintakePose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), gintakePose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.4))
-                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                .addParametricCallback(.85, () -> follower.setMaxPower(0.5))
+                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         gintakeAway = follower.pathBuilder()
                 .addPath(new BezierLine(gintakePose, gintakeAwayPose1))
                 .setLinearHeadingInterpolation(gintakePose.getHeading(), gintakeAwayPose1.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 .build();
 
         returnToShootGintake = follower.pathBuilder()
                 .addPath(new BezierLine(gintakeAwayPose1, shootPose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), shootPose.getHeading())
-                .addParametricCallback(.0, () -> follower.setMaxPower(1))
                 //.addParametricCallback(.85, () -> follower.setMaxPower(0.2))
                 //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
@@ -234,7 +218,7 @@ public class Blue_Close_18 extends LinearOpMode {
 
         util = new Util();
         shooter = new Mortar(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(38.937)));
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(38.937)), follower);
         intake = new Intake(hardwareMap, util.deviceConf);
         gate = new Gate(hardwareMap, util.deviceConf);
         hood = new Hood(hardwareMap, util.deviceConf, new Pose(117.771,126.922,Math.toRadians(38.937)));
@@ -254,7 +238,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 .onEnter( () -> {
                     hood.setHoodPosition(0.55);
                     shooter.setVelocity(1500);
-                    //turret.setAngleOffset(4);
+                    turret.setAngleOffset(-4);
                     follower.followPath(driveStartPosShootPos, true);
                     shooting=true;
                 })
@@ -270,7 +254,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 .state(PathState.SET_UP2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
-                    //turret.setAngleOffset(-4);
+                    turret.setAngleOffset(4);
                     shooter.setVelocity(1480);
                     shooting = false;
                     follower.followPath(setUpTwo, true);
@@ -290,7 +274,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 .loop( () -> {
                     intaking = true;
                 })
-                .transition( () -> ballCount == 3 || follower.atPose(spike2, 0.5, 0.5, Math.toRadians(5)), PathState.RETURN_SHOOT2)
+                .transition( () -> ballCount == 3 || follower.atPose(spike2, 2, 2, Math.toRadians(5)), PathState.RETURN_SHOOT2)
 
                 .state(PathState.RETURN_SHOOT2)
                 .onEnter( () -> {
@@ -377,7 +361,7 @@ public class Blue_Close_18 extends LinearOpMode {
                     intaking = false;
                     intake.setAllPower(1);
                 })
-                .transitionTimed(shootTime, PathState.SET_UP3)
+                .transitionTimed(shootTime, PathState.GINTAKE2)
 
 
                 .state(PathState.GINTAKE2)
@@ -416,19 +400,22 @@ public class Blue_Close_18 extends LinearOpMode {
 
                 .state(PathState.RETURN_SHOOT_GINTAKE2)
                 .onEnter( () -> {
+                    shooting = true;
                     follower.followPath(returnToShootGintake, true);
                     intake.setAllPower(0);
-                    shooting=true;
-                    gate.setPosition(Gate.OPEN);
                     intaking = true;
                 })
                 .loop( () -> {
-                    intaking = true;
+                    shooting = true;
+                    intaking = false;
                     gate.setPosition(Gate.OPEN);
                 })
                 .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.GINTAKE_SHOOT2)
 
                 .state(PathState.GINTAKE_SHOOT2)
+                .onEnter( () -> {
+                    //turret.setAngleOffset(-4);
+                })
                 .loop( () -> {
                     shooting = true;
                     gate.setPosition(Gate.OPEN);
@@ -458,7 +445,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 .loop( () -> {
                     intaking = true;
                 })
-                .transition( () -> follower.atPose(spike3, 1, 1, Math.toRadians(5)) || ballCount == 3, PathState.RETURN_SHOOT3)
+                .transition( () ->  ballCount == 3 || follower.atPose(spike3, 2, 2, Math.toRadians(5)), PathState.RETURN_SHOOT3)
 
 
                 .state(PathState.RETURN_SHOOT3)

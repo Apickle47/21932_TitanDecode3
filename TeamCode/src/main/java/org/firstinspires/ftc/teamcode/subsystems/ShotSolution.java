@@ -15,7 +15,7 @@ public class ShotSolution {
     public double getRpm() {
         return rpm;
     }
-    public double getHood() {
+    public double getHoodP() {
         return hoodPosition;
     }
 }

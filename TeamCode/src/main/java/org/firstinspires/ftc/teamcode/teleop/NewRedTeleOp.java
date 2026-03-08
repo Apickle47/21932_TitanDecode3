@@ -39,7 +39,7 @@ import java.util.Objects;
 @TeleOp(name = "NewRedTeleOp")
 public class NewRedTeleOp extends OpMode {
 
-    public static Pose resetPose = new Pose(116.618412, 129.0323957, 0.7080525);
+    public static Pose resetPose = new Pose(72, 72, 0);
     Util util = new Util();
 
     Intake intake;
@@ -71,6 +71,7 @@ public class NewRedTeleOp extends OpMode {
     private int servoPower;
     int[] powers = {-1, 0, 1};
     int count = 1;
+    int offset = 0;
     int incCount = 0;
     int topColor = 0;
     double[] intakeLightSequence = {0.28, 0.32, 0.36, 0.62};
@@ -88,8 +89,10 @@ public class NewRedTeleOp extends OpMode {
 
     @Override
     public void init() {
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(84,109, 0));
         intake = new Intake(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(84,109, 0));
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(84,109, 0), follower);
         shooter = new Mortar(hardwareMap, util.deviceConf);
         bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
@@ -99,10 +102,8 @@ public class NewRedTeleOp extends OpMode {
         rail = new Rail(hardwareMap, util.deviceConf);
         signal = new Signal(hardwareMap, util.deviceConf);
         tilt = new Tilt(hardwareMap, util.deviceConf);
-        follower = Constants.createFollower(hardwareMap);
         Pose pose;
         ElapsedTime myStopwatch = new ElapsedTime();
-        follower.setStartingPose(new Pose(84,109, 0));
         //sensor.setLEDBrightness(brightness);
         follower.startTeleOpDrive(true);
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -126,8 +127,9 @@ public class NewRedTeleOp extends OpMode {
         topColor = topSensor.hasBall();
         goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
         goalDistMeters = goalDist / 39.37;
-        hood.hoodIncrement(0.025 * incCount, hood.calcHoodPos(goalDistMeters));
-        shooterTargetVel = (int) shooter.calcFlywheel(hood.getLaunchAngle(goalDistMeters), goalDistMeters);
+        hood.hoodIncrement(0.025 * incCount, ShooterTable.getShotSolution(goalDist).getHoodP());
+        shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 20 * offset;
+   //     shooterTargetVel = (int) shooter.calcFlywheel(hood.getLaunchAngle(goalDistMeters), goalDistMeters);
         //shooterTargetVel = shooter.calcVelocity(goalDist);
 
 
@@ -173,12 +175,18 @@ public class NewRedTeleOp extends OpMode {
         if (gamepad2.bWasPressed()) { if (arState != 1) { arState = 3; } }
         // Shooter Speed Override
         if (gamepad1.dpadLeftWasPressed()) {
+            /*
             Mortar.closeB -= 50;
             Mortar.farB -= 50;
+             */
+            offset--;
         }
         if (gamepad1.dpadRightWasPressed()) {
+            /*
             Mortar.closeB += 50;
             Mortar.farB += 50;
+            */
+            offset++;
         }
         // Hood Angle Override
         if (gamepad1.dpadUpWasPressed()) {
@@ -330,10 +338,9 @@ public class NewRedTeleOp extends OpMode {
         telemetryM.addLine("");
         telemetryM.addLine("SHOOTER:");
         telemetryM.addData("Shooter vel", shooter.getVelocity());
-        telemetryM.addData("exit vel:", shooter.calcExitVel(hood.getLaunchAngle(goalDist), goalDist));
+  //      telemetryM.addData("exit vel:", shooter.calcExitVel(hood.getLaunchAngle(goalDistMeters), goalDistMeters));
+      //  telemetryM.addData("shooter exit vel flywheel speed", shooter.calcFlywheel(hood.getLaunchAngle(goalDistMeters), goalDistMeters));
         telemetryM.addData("Shooter target vel", shooter.getTargetVelocity());
-    //  telemetryM.addData("Keep Shooter Running", keepShooterRunning);
-   //   telemetryM.addData("Preshoot", preshoot);
         telemetryM.addData("closeB", Mortar.closeB);
         telemetryM.addData("farB", Mortar.farB);
         telemetryM.addLine("");
@@ -353,7 +360,7 @@ public class NewRedTeleOp extends OpMode {
         telemetryM.addLine("MISC:");
         telemetryM.addData("Ball Count", ballCount);
         telemetryM.addData("hood angle", hood.getHoodPosition());
-        telemetryM.addData("launch angle:", hood.getLaunchAngle(goalDist));
+      //  telemetryM.addData("launch angle:", Math.toDegrees(hood.getLaunchAngle(goalDistMeters)));
         telemetryM.addData("LED Color", signal.getLEDColor());
         telemetryM.addData("Rail Position", rail.getPosition());
         telemetryM.addData("Tilt Power", servoPower);

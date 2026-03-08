@@ -21,4 +21,5 @@ public class ShotPoint {
         this.hoodPosition = hoodPosition;
         this.time = time;
     }
+
 }

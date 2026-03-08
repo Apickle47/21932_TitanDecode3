@@ -46,11 +46,14 @@ public class Mortar {
         return flyMotor2.getVelocity();
     }
 
+    /*
     public int calcVelocity(double dist) {
         double b = dist>120 ? farB : closeB;
         //b = closeB;
         return (int) (slope*(dist) + b);
     }
+    */
+
 
     public void setFlyMotorPower(double power) {
         flyMotor.setPower(power);
@@ -67,16 +70,15 @@ public class Mortar {
     public double getPower() {
         return power;
     }
-
+/*
     public double calcFlywheel(double hoodAngle, double x) {
-        return 4732.34889 * calcExitVel(hoodAngle, x) - 858.07191;
+        return 300 * calcExitVel(hoodAngle, x) - 800;
     }
 
     public double calcExitVel(double hoodAngle, double x) {
         return Math.sqrt(g*x*x/(2*Math.cos(hoodAngle)*Math.cos(hoodAngle)*(x*Math.tan(hoodAngle) - yDistToGoal)));
     }
-
-
+*/
     public void update() {
         flyMotor.setPower(power);
         flyMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(p, 0, 0, f));

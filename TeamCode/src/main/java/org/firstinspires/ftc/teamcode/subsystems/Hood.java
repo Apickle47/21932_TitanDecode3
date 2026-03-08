@@ -37,10 +37,6 @@ public class Hood {
             pos = dist < 115 ? closeHood : farHood;
     }
     */
-    public void testing(boolean t) {
-        TEST = t;
-    }
-
     public double getHoodPosition() {
         return pos;
     }
@@ -56,7 +52,7 @@ public class Hood {
             this.pos = maxHood;
         }
     }
-
+/*
     public double calcHoodPos(double x) {
         return (((.4315 - 1)/(40.7 - 64)) * (Math.toDegrees(getLaunchAngle(x)) - 40.7)) + .4315;
     }
@@ -64,7 +60,7 @@ public class Hood {
     public double getLaunchAngle(double x) {
         return Math.atan(2*yDistToGoal/x - Math.tan(trajAngle));
     }
-
+*/
     public void update() {
         hood.setPosition(pos);
     }

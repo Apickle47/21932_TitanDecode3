@@ -6,11 +6,29 @@ import com.bylazar.configurables.annotations.Configurable;
 public class ShooterTable {
 
     private static final ShotPoint[] SHOT_TABLE = {
-            new ShotPoint(24.0, 2200, 0.18),
-            new ShotPoint(30.0, 2325, 0.22),
-            new ShotPoint(36.0, 2450, 0.27),
-            new ShotPoint(42.0, 2580, 0.31),
-            new ShotPoint(48.0, 2720, 0.36)
+            new ShotPoint(37.923,1210, 1),
+            new ShotPoint(59.83,1250, 0.8),
+            new ShotPoint(71.06, 1330, 0.75),
+            new ShotPoint(80.57, 1380, 0.7),
+            new ShotPoint(91.65, 1460, 0.65),
+            new ShotPoint(103.30, 1550, 0.6),
+            new ShotPoint(113.61, 1620, 0.55),
+            new ShotPoint(117.13, 1660, 0.55),
+            new ShotPoint(132.19, 1760, 0.45),
+            new ShotPoint(141.63, 1810, 0.45),
+            new ShotPoint(150.0, 1850, 0.4),
+            new ShotPoint(170.80, 2020, 0.4),
+
+            /*
+            new ShotPoint(55.425, 1250, 0.75),
+            new ShotPoint(64.39, 1300, 0.65),
+            new ShotPoint(70.36, 1270, 0.7),
+            new ShotPoint(90.1, 1490, 0.6),
+            new ShotPoint(101.81, 1550, 0.55),
+            new ShotPoint(101.81, 1550, 0.55),
+             */
+
+
     };
 
     public static ShotSolution getShotSolution(double distance) {
