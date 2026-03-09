@@ -114,6 +114,8 @@ public class Blue_Close_18 extends LinearOpMode {
                 .build();
 
         spikeTwo = follower.pathBuilder()
+                .addPath(new BezierLine(PreshootPose, setUp2))
+                .setLinearHeadingInterpolation(startPose.getHeading(), setUp2.getHeading())
                 .addPath(new BezierLine(setUp2,spike2))
                 .setLinearHeadingInterpolation(setUp2.getHeading(), spike2.getHeading())
                 .build();
@@ -128,6 +130,8 @@ public class Blue_Close_18 extends LinearOpMode {
                 .setLinearHeadingInterpolation(shootPose.getHeading(), setUp3.getHeading())
                 .build();
         spikeThree = follower.pathBuilder()
+                .addPath(new BezierLine(shootPose, setUp3))
+                .setLinearHeadingInterpolation(shootPose.getHeading(), setUp3.getHeading())
                 .addPath(new BezierLine(setUp3, spike3))
                 .setLinearHeadingInterpolation(setUp3.getHeading(), spike3.getHeading())
                 .build();
@@ -238,7 +242,6 @@ public class Blue_Close_18 extends LinearOpMode {
                 .onEnter( () -> {
                     hood.setHoodPosition(0.55);
                     shooter.setVelocity(1500);
-                    turret.setAngleOffset(-4);
                     follower.followPath(driveStartPosShootPos, true);
                     shooting=true;
                 })
@@ -247,14 +250,13 @@ public class Blue_Close_18 extends LinearOpMode {
                     shooter.setVelocity(1500);
                     gate.setPosition(Gate.OPEN);
                 })
-                .transition( () -> follower.atPose(PreshootPose, 1, 1, Math.toRadians(6)), PathState.SET_UP2)
+                .transition( () -> follower.atPose(PreshootPose, 1, 1, Math.toRadians(6)), PathState.SPIKE_TWO)
 
 
 
                 .state(PathState.SET_UP2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
-                    turret.setAngleOffset(4);
                     shooter.setVelocity(1480);
                     shooting = false;
                     follower.followPath(setUpTwo, true);
@@ -269,9 +271,14 @@ public class Blue_Close_18 extends LinearOpMode {
 
                 .state(PathState.SPIKE_TWO)
                 .onEnter( () -> {
+                    gate.setPosition(Gate.CLOSE);
+                    shooter.setVelocity(1480);
+                    shooting = false;
                     follower.followPath(spikeTwo, true);
                 })
                 .loop( () -> {
+                    gate.setPosition(Gate.CLOSE);
+                    shooting = false;
                     intaking = true;
                 })
                 .transition( () -> ballCount == 3 || follower.atPose(spike2, 2, 2, Math.toRadians(5)), PathState.RETURN_SHOOT2)
