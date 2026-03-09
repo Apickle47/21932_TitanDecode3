@@ -82,7 +82,7 @@ public class NewRedTeleOp extends OpMode {
     // Add more light sequences here if needed
 
     double[][] lightSequences = {intakeLightSequence, StorageLightSequence};
-    int actSeq = 1;
+    int actSeq = 0;
     int shooterTargetVel = 0;
     int ballCount = 0;
 
@@ -115,7 +115,7 @@ public class NewRedTeleOp extends OpMode {
         follower.update();
         hood.setHoodPosition(0.6);
         rail.setPosition(Rail.INDEX);
-        Turret.tracking = false;
+        //Turret.tracking = false;
 
     }
 
@@ -139,8 +139,10 @@ public class NewRedTeleOp extends OpMode {
         if (gamepad1.rightBumperWasPressed()) {
             if (arState == 1) {
                 arState = 0;
+                abState = 1;
             }
             else {
+                intake.setAllPower(0);
                 arState = 1;
                 abState = 0;
             }
@@ -223,11 +225,13 @@ public class NewRedTeleOp extends OpMode {
         // Arush States
         switch (arState) {
             case(0): //Not Shooting
+                actSeq = 0;
                 gate.setPosition(Gate.CLOSE);
-                Turret.tracking = false;
+                //Turret.tracking = false;
                 shooter.setVelocity(Mortar.WAIT);
                 break;
             case(1): //Shooting
+                actSeq = 1;
                 shooter.setVelocity(shooterTargetVel);
                 if (!turretOverride) { Turret.tracking = true; }
                 if (shooter.safeToShoot(shooterTargetVel)) {
@@ -256,21 +260,21 @@ public class NewRedTeleOp extends OpMode {
         //Abhay States
         switch (abState) {
             case(0): //Intake Off
-                actSeq = 1;
                 intake.setAllPower(0);
                 break;
             case(1): //Intake On
                 actSeq = 0;
-                intake.setAllPower(1);
                 if (ballCount >= 2 && arState != 1) {
                     intake.setRollerPower(0);
                 }
-                if (ballCount >= 3 && arState != 1) {
-                    abState = 0;
+                else if (ballCount >= 3) {
+                    intake.setAllPower(0);
+                }
+                else {
+                    intake.setAllPower(1);
                 }
                 break;
             case(2):
-                actSeq = 1;
                 intake.setAllPower(-0.75);
                 break;
             case(3): //Tilt
@@ -283,20 +287,11 @@ public class NewRedTeleOp extends OpMode {
         double liftTime = 6;
         switch(actSeq) {
             case(0):
+                if (arState == 1) {actSeq = 1;}
                 signal.setPosition(lightSequences[0][ballCount]);
                 break;
             case(1):
-                switch(topColor) {
-                    case(0):
-                        signal.setPosition(1);
-                        break;
-                    case(1):
-                        if (topSensor.getColor() == "GREEN"){ signal.setPosition(0.52); }
-                        else {signal.setPosition(0.7);}
-                        break;
-                    default:
-                        topColor=0;
-                }
+                signal.setPosition(0.52);
                 break;
             case(2):
                 signal.setPosition(0.62);
@@ -309,7 +304,7 @@ public class NewRedTeleOp extends OpMode {
                     signal.setPosition(0.52);
                 break;
             default:
-                actSeq=1;
+                actSeq=0;
         }
 
 
