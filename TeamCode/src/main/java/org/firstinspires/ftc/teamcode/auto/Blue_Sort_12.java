@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.BottomSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Gate;
 import org.firstinspires.ftc.teamcode.subsystems.Hood;
+import org.firstinspires.ftc.teamcode.subsystems.InfernoTower;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.MiddleSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Mortar;
@@ -30,7 +31,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 import java.util.List;
 
 @Autonomous
-public class Blue_Close_18 extends LinearOpMode {
+public class Blue_Sort_12 extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -48,6 +49,8 @@ public class Blue_Close_18 extends LinearOpMode {
     BottomSensor bottomSensor;
     MiddleSensor middleSensor;
     TopSensor topSensor;
+    InfernoTower camera;
+
 
     public static int KICKER_WAIT_TIME = 600;
 
@@ -57,6 +60,7 @@ public class Blue_Close_18 extends LinearOpMode {
     private PathState[] idleShoot;
     private Pose[] idleShootPose;
     private int count;
+    private double sortID = -1;
     private int gintakeCount;
     ElapsedTime time1 = new ElapsedTime();
     private double shooterTargetVel;
@@ -69,21 +73,21 @@ public class Blue_Close_18 extends LinearOpMode {
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(26.678,126.578, 2.4534);
+    private final Pose startPose = new Pose(27.578,127.878, 2.4334);
     private final Pose scanShootPose = new Pose(85.8,75.24, Math.toRadians(90)).mirror();
     private final Pose PreshootPose = new Pose(85.8,75.24, Math.toRadians(38.937)).mirror();
     private final Pose shootPose = new Pose(85.8,79.24, 0).mirror();
     private final Pose lastShootPose = new Pose(84,109, 0).mirror();
-    private final Pose spike1 = new Pose(131, 84.14, Math.toRadians(0)).mirror();
+    private final Pose spike1 = new Pose(129.2, 84.14, Math.toRadians(0)).mirror();
     private final Pose setUp2 = new Pose(95, 58.2, Math.toRadians(0)).mirror();
     private final Pose leave2 = new Pose(110, 58.2, Math.toRadians(0)).mirror();
-    private final Pose spike2 = new Pose(133,59.2,Math.toRadians(0)).mirror();
+    private final Pose spike2 = new Pose(132,59.2,Math.toRadians(0)).mirror();
     private final Pose setUp3 = new Pose(93,35, Math.toRadians(0)).mirror();
-    private final Pose spike3 = new Pose(135, 35, Math.toRadians(0)).mirror();
+    private final Pose spike3 = new Pose(133, 35, Math.toRadians(0)).mirror();
     private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90)).mirror();
     private final Pose humanPose = new Pose(130,7, Math.toRadians(-90)).mirror();
-    private final Pose gintakeAwayPose1 = new Pose(102.65, 57.4, 0).mirror();
-    private final Pose gintakePose = new Pose(13.47, 59.26086, 2.628); //1 degree = 0.01745329251994329576923690768489 rad
+    private final Pose gintakeAwayPose1 = new Pose(102.65, 60.4, 0).mirror();
+    private final Pose gintakePose = new Pose(132.5, 59.5, 0.5560).mirror();  //1 degree = 0.01745329251994329576923690768489 rad
     private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90)).mirror();
     private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90)).mirror();
 
@@ -93,23 +97,19 @@ public class Blue_Close_18 extends LinearOpMode {
     public void buildPaths() {
         // put in coordinates for starting pose > ending pose
         driveStartPosShootPos = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, PreshootPose))
-                .setConstantHeadingInterpolation(startPose.getHeading())
+                .addPath(new BezierLine(startPose, scanShootPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), scanShootPose.getHeading())
                 .addParametricCallback(.4, () -> follower.setMaxPower(0.8))
                 .addParametricCallback(.5, () -> intake.setAllPower(1))
-                 .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         spikeOne = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, spike1))
+                .addPath(new BezierLine(scanShootPose, spike1))
                 .setConstantHeadingInterpolation(spike1.getHeading())
                 .build();
-
         returnToShoot1 = follower.pathBuilder()
-                .addPath(new BezierLine(spike1, lastShootPose))
+                .addPath(new BezierLine(spike1, shootPose))
                 .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         setUpTwo = follower.pathBuilder()
                 .addPath(new BezierLine(PreshootPose, setUp2))
@@ -165,6 +165,8 @@ public class Blue_Close_18 extends LinearOpMode {
         gintake = follower.pathBuilder()
                 .addPath(new BezierLine(gintakeAwayPose1, gintakePose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), gintakePose.getHeading())
+                .addParametricCallback(.85, () -> follower.setMaxPower(0.5))
+                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         gintakeAway = follower.pathBuilder()
                 .addPath(new BezierLine(gintakePose, gintakeAwayPose1))
@@ -225,16 +227,18 @@ public class Blue_Close_18 extends LinearOpMode {
 
         util = new Util();
         shooter = new Mortar(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(26.678,126.578, 2.4534), follower);
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(27.578,127.878, 2.4334), follower);
         intake = new Intake(hardwareMap, util.deviceConf);
         gate = new Gate(hardwareMap, util.deviceConf);
-        hood = new Hood(hardwareMap, util.deviceConf, new Pose(26.678,126.578, 2.4534));
+        hood = new Hood(hardwareMap, util.deviceConf, new Pose(27.578,127.878, 2.4334));
         signal = new Signal(hardwareMap, util.deviceConf);
         rail = new Rail(hardwareMap, util.deviceConf);
         bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
         middleSensor = new MiddleSensor(hardwareMap, util.deviceConf);
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
         double offset = 0;
+        camera = new InfernoTower(hardwareMap, util.deviceConf);
+
 
         turret.setBasketPos(Turret.blueBasket);
         follower.setPose(startPose);
@@ -244,320 +248,114 @@ public class Blue_Close_18 extends LinearOpMode {
                 //good
                 .state(PathState.DRIVE_START_POS_SHOOT_POS)
                 .onEnter( () -> {
+                    follower.followPath(driveStartPosShootPos, true);
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 15;
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
                     shooter.setVelocity(shooterTargetVel);
                     follower.followPath(driveStartPosShootPos, true);
                     shooting=true;
                 })
                 .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
                     shooting = true;
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 15;
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
                     shooter.setVelocity(shooterTargetVel);
                     gate.setPosition(Gate.OPEN);
-                })
-                .transition( () -> follower.atPose(PreshootPose, 1, 1, Math.toRadians(6)), PathState.SPIKE_TWO)
-
-
-/*
-                .state(PathState.SET_UP2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                    shooter.setVelocity(1480);
-                    shooting = false;
-                    follower.followPath(setUpTwo, true);
-                })
-                .loop( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                    shooter.setVelocity(1480);
-                    shooting = false;
-                    intaking = false;
-                })
-
-
-                .transition( () -> follower.atPose(setUp2, 0.5, 0.5, Math.toRadians(5)), PathState.SPIKE_TWO)
-*/
-                .state(PathState.SPIKE_TWO)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                    shooter.setVelocity(shooterTargetVel);
-                    shooting = false;
-                    follower.followPath(spikeTwo, true);
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    gate.setPosition(Gate.CLOSE);
-                    shooting = false;
-                    intaking = true;
-                })
-                .transition( () -> ballCount == 3 || follower.atPose(spike2, 0.5, 0.5), PathState.RETURN_SHOOT2)
-
-                .state(PathState.RETURN_SHOOT2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    follower.followPath(returnToShoot2, true);
-                    intake.setAllPower(0);
-                    intaking = true;
-
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    gate.setPosition(Gate.OPEN);
+                    sortID = camera.getLatestDetections();
                 })
                 .onExit( () -> {
-                    double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
-                    hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 10;
-                    shooter.setVelocity(shooterTargetVel);
-                    gate.setPosition(Gate.CLOSE);
                 })
-                .transition( () -> follower.atPose(shootPose, 0.5, 0.5), PathState.SHOOT_TWO)
-
-                .state(PathState.SHOOT_TWO)
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    gate.setPosition(Gate.OPEN);
-                    double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
-                    hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 10;
-                    shooter.setVelocity(shooterTargetVel);
-                    shooting = true;
-                    intaking = false;
-                    intake.setAllPower(1);
-                })
-                .transitionTimed(1, PathState.GINTAKE)
+                .transition( () -> follower.atPose(scanShootPose, 0.5, 0.5), PathState.SPIKE_ONE)
 
 
-                .state(PathState.GINTAKE)
-                .onEnter( () -> {
-                    shooting = false;
-                    gate.setPosition(Gate.CLOSE);
-                    follower.followPath(gintake, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    gate.setPosition(Gate.CLOSE);
-                    intaking = true;
-                })
-                .transitionTimed(1.5, PathState.IDLE_GATE)
-
-
-                .state(PathState.IDLE_GATE)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    intaking = true;
-                })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE)
-                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE)
-
-
-                .state(PathState.GINTAKE_AWAY)
-                .onEnter( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    gate.setPosition(Gate.OPEN);
-                    intaking = true;
-                    follower.followPath(gintakeAway, true);
-                })
-                .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE)
-
-
-                .state(PathState.RETURN_SHOOT_GINTAKE)
-                .onEnter( () -> {
-                    shooting = true;
-                    follower.followPath(returnToShootGintake, true);
-                    intake.setAllPower(0);
-                    intaking = true;
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    shooting = true;
-                    intaking = false;
-                    gate.setPosition(Gate.OPEN);
-                })
-                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.GINTAKE_SHOOT)
-
-
-                .state(PathState.GINTAKE_SHOOT)
-                .onEnter( () -> {
-                    //turret.setAngleOffset(-4);
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    shooting = true;
-                    gate.setPosition(Gate.OPEN);
-                    intaking = false;
-                    intake.setAllPower(1);
-                })
-                .transitionTimed(shootTime, PathState.GINTAKE2)
-
-
-                .state(PathState.GINTAKE2)
-                .onEnter( () -> {
-                    shooting = false;
-                    gate.setPosition(Gate.CLOSE);
-                    follower.followPath(gintake, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    gate.setPosition(Gate.CLOSE);
-                    intaking = true;
-                })
-                .transitionTimed(1, PathState.IDLE_GATE2)
-
-
-                .state(PathState.IDLE_GATE2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    intaking = true;
-
-                })
-                .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE2)
-                .transitionTimed(4, PathState.RETURN_SHOOT_GINTAKE2)
-
-
-                .state(PathState.GINTAKE_AWAY2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    intaking = true;
-                    follower.followPath(gintakeAway, true);
-                })
-                .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE2)
-
-                .state(PathState.RETURN_SHOOT_GINTAKE2)
-                .onEnter( () -> {
-                    shooting = true;
-                    follower.followPath(returnToShootGintake, true);
-                    intake.setAllPower(0);
-                    intaking = true;
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    shooting = true;
-                    intaking = false;
-                    gate.setPosition(Gate.OPEN);
-                })
-                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.GINTAKE_SHOOT2)
-
-                .state(PathState.GINTAKE_SHOOT2)
-                .onEnter( () -> {
-                    //turret.setAngleOffset(-4);
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    shooting = true;
-                    gate.setPosition(Gate.OPEN);
-                    intaking = false;
-                    intake.setAllPower(1);
-
-                })
-                .transitionTimed(shootTime, PathState.SPIKE_THREE)
-
-/*
-                .state(PathState.SET_UP3)
-                .onEnter( () -> {
-                    //turret.setAngleOffset(4);
-                    shooting = false;
-                    follower.followPath(setUpThree, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-                    intaking = false;
-                })
-                .transition( () -> !follower.isBusy(), PathState.SPIKE_THREE)
-*/
-                .state(PathState.SPIKE_THREE)
-                .onEnter( () -> {
-                    shooting = false;
-                    intaking = true;
-                    follower.followPath(spikeThree, true);
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    shooting = false;
-                    intaking = true;
-                })
-                .transition( () ->  ballCount == 3 || follower.atPose(spike3, 0.5, 0.5, Math.toRadians(5)), PathState.RETURN_SHOOT3)
-                .transitionTimed(4, PathState.RETURN_SHOOT3)
-
-
-                .state(PathState.RETURN_SHOOT3)
-                .onEnter( () -> {
-                    follower.followPath(returnToShoot3, true);
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    intaking = false;
-                    shooting = false;
-                })
-                .transition( () -> follower.atPose(shootPose, 0.5, 0.5), PathState.SHOOT_THREE)
-
-
-                .state(PathState.SHOOT_THREE)
-                .onEnter( () -> {
-                    shooting = true;
-                })
-                .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    shooting = true;
-                    gate.setPosition(Gate.OPEN);
-                    intaking = false;
-                    intake.setAllPower(1);
-                })
-                .transitionTimed(shootTime, PathState.SPIKE_ONE)
 
 
                 .state(PathState.SPIKE_ONE)
                 .onEnter( () -> {
-                    shooting = false;
+                    shooting=false;
+                    intaking=true;
                     follower.followPath(spikeOne, true);
                 })
                 .loop( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
+                    gate.setPosition(Gate.CLOSE);
                     intaking = true;
                 })
-                .transitionTimed(2, PathState.RETURN_SHOOT1)
-                .transition( () -> ballCount == 3 || follower.atPose(spike1, 0.5, 0.5), PathState.RETURN_SHOOT1)
-
+                .transition( () -> follower.atPose(spike1, 0.5, 0.5, Math.toRadians(3)) || ballCount == 3, Blue_Sort_12_Reference.PathState.RETURN_SHOOT1)
 
                 .state(PathState.RETURN_SHOOT1)
                 .onEnter( () -> {
-                    //turret.setAngleOffset(-2);
                     follower.followPath(returnToShoot1, true);
-                    intaking = false;
+                    intaking=false;
+                    intake.setAllPower(0);
+                    switch((int)sortID) {
+                        case(21):
+                            break;
+                        case(22):
+                            rail.setPosition(Rail.INDEX);
+                            break;
+                        case(23):
+                            break;
+                        default:
+                            break;
+                    }
                 })
                 .loop( () -> {
+                    intake.setAllPower(0);
+                    switch((int)sortID) {
+                        case(21):
+                            break;
+                        case(22):
+                            rail.setPosition(Rail.INDEX);
+                            break;
+                        case(23):
+                            break;
+                        default:
+                            break;
+                    }
                     gate.setPosition(Gate.OPEN);
-                    double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
-                    hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
-                    shooter.setVelocity(shooterTargetVel);
                 })
-                .transition( () -> follower.atPose(lastShootPose, .5, .5), PathState.SHOOT_ONE)
+                .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(3)), Blue_Sort_12_Reference.PathState.SHOOT_ONE)
 
                 .state(PathState.SHOOT_ONE)
-                .loop( () -> {
+                .onEnter( () -> {
                     shooting = true;
-                    intaking = false;
-                    intake.setAllPower(1);
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
                     shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
                     shooter.setVelocity(shooterTargetVel);
                 })
-
-
+                .loop( () -> {
+                    shooting = true;
+                    double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
+                    hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
+                    shooter.setVelocity(shooterTargetVel);
+                    if (sortID == 21) {
+                        intake.setAllPower(1);
+                    }
+                    if (sortID == 23) {
+                        intake.setRollerPower(0.6);
+                    }
+                    if (sortID == 23 && ballCount < 2) {
+                        intake.setAllPower(1);
+                    }
+                    if (ballCount == 2 && sortID == 22) {
+                        intake.setRollerPower(0.6);
+                    }
+                    if (ballCount == 1 && sortID == 22) {
+                        intake.setAllPower(0.8);
+                    }
+                    if (ballCount == 0 && (int)sortID == 22 && rail.getPosition() != Rail.INLINE) {
+                        intake.setAllPower(0);
+                        rail.setPosition(Rail.INLINE);
+                        intake.setAllPower(1);
+                    }
+                })
+                .onExit( () -> {
+                    rail.setPosition(Rail.INLINE);
+                })
 
                 .build();
 
@@ -565,12 +363,9 @@ public class Blue_Close_18 extends LinearOpMode {
 
         waitForStart();
         machine.start();
-
-        opModeTimer.resetTimer();
         Turret.tracking = true;
-        rail.setPosition(Rail.INDEX);
-        //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
-        //shooter.setVelocity(1485);
+        hood.setHoodPosition(.60);
+        rail.setPosition(Rail.INLINE);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
@@ -605,6 +400,7 @@ public class Blue_Close_18 extends LinearOpMode {
 
 //TELEMETRY
             telemetry.addData("path state", pathState.toString());
+            telemetry.addData("sortID", sortID);
             telemetry.addData("x", follower.getPose().getX());
             telemetry.addData("y", follower.getPose().getY());
             telemetry.addData("heading", follower.getPose().getHeading());

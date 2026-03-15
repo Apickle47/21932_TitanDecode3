@@ -74,6 +74,7 @@ public class NewBlueTeleOp extends OpMode {
     int offset = 0;
     int incCount = 0;
     int topColor = 0;
+    double waitVel = Mortar.WAIT;
     double[] intakeLightSequence = {0.28, 0.32, 0.36, 0.62};
     double[] StorageLightSequence = {1.0, 0.71, 0.5};
     double goalDist = Math.sqrt(Math.pow(72, 2) + Math.pow(72, 2));
@@ -128,7 +129,7 @@ public class NewBlueTeleOp extends OpMode {
         goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
         goalDistMeters = goalDist / 39.37;
         hood.hoodIncrement(0.025 * incCount, ShooterTable.getShotSolution(goalDist).getHoodP());
-        shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 20 * offset;
+        shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 10 * offset;
         //     shooterTargetVel = (int) shooter.calcFlywheel(hood.getLaunchAngle(goalDistMeters), goalDistMeters);
         //shooterTargetVel = shooter.calcVelocity(goalDist);
 
@@ -217,6 +218,13 @@ public class NewBlueTeleOp extends OpMode {
                 rail.setPosition(Rail.INDEX);
             }
         }
+        // Wait Vel
+        if (gamepad2.dpadUpWasPressed()) {
+            waitVel = Mortar.WAITF;
+        }
+        if (gamepad2.dpadDownWasPressed()) {
+            waitVel = Mortar.WAIT;
+        }
 
 
 
@@ -228,7 +236,7 @@ public class NewBlueTeleOp extends OpMode {
                 actSeq = 0;
                 gate.setPosition(Gate.CLOSE);
                 //Turret.tracking = false;
-                shooter.setVelocity(Mortar.WAIT);
+                shooter.setVelocity(waitVel);
                 break;
             case(1): //Shooting
                 actSeq = 1;
@@ -264,14 +272,23 @@ public class NewBlueTeleOp extends OpMode {
                 break;
             case(1): //Intake On
                 actSeq = 0;
-                if (ballCount >= 2 && arState != 1) {
-                    intake.setRollerPower(0);
-                }
-                else if (ballCount >= 3) {
-                    intake.setAllPower(0);
-                }
-                else {
-                    intake.setAllPower(1);
+                switch (ballCount){
+                    case(0):
+                        intake.setAllPower(1);
+                        break;
+                    case(2):
+                        if (arState != 1) {
+                            intake.setRollerPower(0);
+                        }
+                        break;
+                    case(3):
+                        if (arState != 1) {
+                            intake.setAllPower(0);
+                        }
+                        break;
+                    default:
+                        intake.setAllPower(1);
+                        break;
                 }
                 break;
             case(2):

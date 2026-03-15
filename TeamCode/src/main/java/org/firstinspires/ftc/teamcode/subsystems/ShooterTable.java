@@ -14,10 +14,10 @@ public class ShooterTable {
             new ShotPoint(103.30, 1550, 0.6),
             new ShotPoint(113.61, 1620, 0.55),
             new ShotPoint(117.13, 1660, 0.55),
-            new ShotPoint(132.19, 1760, 0.45),
-            new ShotPoint(141.63, 1810, 0.45),
-            new ShotPoint(150.0, 1850, 0.4),
-            new ShotPoint(170.80, 2020, 0.4),
+            new ShotPoint(132.19, 1840, 0.45),
+            new ShotPoint(141.63, 1895, 0.45),
+            new ShotPoint(150.0, 1945, 0.45),
+            new ShotPoint(170.80, 2070, 0.45),
 
             /*
             new ShotPoint(55.425, 1250, 0.75),

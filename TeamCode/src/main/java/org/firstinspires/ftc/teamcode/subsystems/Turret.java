@@ -26,7 +26,7 @@ public class Turret {
     //private PinpointLocalizer localizer;
 
     public static double maxRange = Math.toRadians(355) * 108.0/96;
-    public static double x, y, dx, dy, t = 0.88, heading, turretHeading, turretHeadingRelative;
+    public static double x, y, dx, dy, t = 0.9, heading, turretHeading, turretHeadingRelative;
 
     public static boolean tracking = false;
 
