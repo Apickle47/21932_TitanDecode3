@@ -30,6 +30,7 @@ public class Util {
         deviceConf.put("turret2",           "turret2");//
         deviceConf.put("hood",              "hood");//
         deviceConf.put("signal",            "signal");
+        deviceConf.put("signal2",            "signal2");
         deviceConf.put("bottomSensor",      "bottomSensor");
         deviceConf.put("middleSensor",      "middleSensor");
         deviceConf.put("topSensor",         "topSensor");

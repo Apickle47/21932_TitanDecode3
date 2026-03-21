@@ -22,7 +22,7 @@ public class PedroDashTuning {
     public static PIDFCoefficients heading = new PIDFCoefficients(
             5,
             0,
-            0.5,
+            0.4,
             0.02
     );
     public static PIDFCoefficients secondaryHeading = new PIDFCoefficients(
@@ -35,7 +35,7 @@ public class PedroDashTuning {
     public static FilteredPIDFCoefficients drive = new FilteredPIDFCoefficients(
             0.05,
             0,
-            0.0001,
+            0.000,
             0.6,
             0.01
     );

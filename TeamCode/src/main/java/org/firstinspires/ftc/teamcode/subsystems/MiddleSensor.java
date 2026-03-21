@@ -1,54 +1,51 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.HashMap;
 import java.util.Objects;
 
 public class MiddleSensor {
-    NormalizedColorSensor middleSensor;
+    ColorSensor middleSensor;
     private String color;
-    public int cm;
-    private float normRed, normGreen, normBlue;
-
+    private float R, G, B;
+    public int ct, noise;
     public MiddleSensor(HardwareMap hwMap, HashMap<String, String> config) {
-        middleSensor = hwMap.get(NormalizedColorSensor.class, config.get("middleSensor"));
-        middleSensor.setGain(4);
+        middleSensor = hwMap.get(ColorSensor.class, config.get("middleSensor"));
+        noise = 160;
+        //topSensor.setGain(4);
     }
 
     public void update() {
-        NormalizedRGBA colors = middleSensor.getNormalizedColors();
-
-        normRed = colors.red / colors.alpha;
-        normGreen = colors.green / colors.alpha;
-        normBlue = colors.blue / colors.alpha;
-
-        //telemetry.addLine("MIDDLE SENSOR");
-        //telemetry.addData("red", normRed);
-        //telemetry.addData("green", normGreen);
-        //telemetry.addData("blue", normBlue);
-        //telemetry.addData("Color: ", getColor());
-
-        if ((normGreen > normBlue && normGreen > normRed) && (.04 < normGreen && normGreen < .18)) {
-            color = "GREEN";
-        } else if ((normRed < .1)) {
-            color = "PURPLE";
-        } else {
+        R = middleSensor.red();
+        G = middleSensor.green();
+        B = middleSensor.blue();
+/*
+        telemetry.addLine("TOP SENSOR");
+        telemetry.addData("red", normRed);
+        telemetry.addData("green", normGreen);
+        telemetry.addData("blue", normBlue);
+        telemetry.addData("Color: ", getColor());
+*/
+        if ((R + G + B) < noise) {
             color = "UNKNOWN";
+        } else if (G > 110 && G > B) {
+            color = "GREEN";
+        } else {
+            color = "PURPLE";
         }
+
     }
-    public float getR() {return normRed;}
-    public float getG() {return normGreen;}
-    public float getB() {return normBlue;}
     public String getColor() {
         return color;
     }
+    public float getR() {return R;}
+    public float getG() {return G;}
+    public float getB() {return B;}
+
     public int hasBall() {
         return (!(Objects.equals(color, "UNKNOWN"))) ? 1 : 0;
     }

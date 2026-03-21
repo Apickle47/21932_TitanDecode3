@@ -29,8 +29,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Util;
 
 import java.util.List;
 
-@Autonomous
-public class Blue_Close_18 extends LinearOpMode {
+@Autonomous(name = "Red Solo 18 Close")
+public class redClose18_SOLO extends LinearOpMode {
 
     private Follower follower;
     private Timer pathTimer, opModeTimer;
@@ -49,46 +49,36 @@ public class Blue_Close_18 extends LinearOpMode {
     MiddleSensor middleSensor;
     TopSensor topSensor;
 
-    public static int KICKER_WAIT_TIME = 600;
 
-    private int shooterTargetSpeed;
-    private int launchCount, shootPoseCount, launchIf;
-    private double target;
-    private PathState[] idleShoot;
-    private Pose[] idleShootPose;
-    private int count;
     private int gintakeCount;
-    ElapsedTime time1 = new ElapsedTime();
     private double shooterTargetVel;
 
 
 
     public enum PathState {
-        DRIVE_START_POS_SHOOT_POS, SHOOT_PRE, SPIKE_ONE, RETURN_SHOOT1, SHOOT_ONE, SET_UP2, SPIKE_TWO, RETURN_SHOOT2, SHOOT_TWO, SET_UP3, SPIKE_THREE, RETURN_SHOOT3, SET_UP_HUMAN, HUMAN, RETURN_SHOOT_HUMAN, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, GINTAKE_SHOOT, GINTAKE_AWAY2, GINTAKE2, RETURN_SHOOT_GINTAKE2, GINTAKE_SHOOT2, GINTAKE_SETUP, DONE, IDLE_SHOOT, IDLE_GATE, IDLE_GATE2, HIT_GATE1, HIT_GATE2, SHOOT_THREE
+        DRIVE_START_POS_SHOOT_POS, SPIKE_ONE, RETURN_SHOOT1, SHOOT_ONE, SPIKE_TWO, RETURN_SHOOT2, SHOOT_TWO, SPIKE_THREE, RETURN_SHOOT3, GINTAKE_AWAY, GINTAKE, RETURN_SHOOT_GINTAKE, GINTAKE_SHOOT, GINTAKE_AWAY2, GINTAKE2, RETURN_SHOOT_GINTAKE2, GINTAKE_SHOOT2, IDLE_GATE, IDLE_GATE2, SHOOT_THREE
     }
 
     PathState pathState;
 
-    private final Pose startPose = new Pose(26.678,126.578, 2.4534);
-    private final Pose scanShootPose = new Pose(85.8,75.24, Math.toRadians(90)).mirror();
-    private final Pose PreshootPose = new Pose(85.8,75.24, Math.toRadians(38.937)).mirror();
-    private final Pose shootPose = new Pose(85.8,79.24, 0).mirror();
-    private final Pose lastShootPose = new Pose(84,109, 0).mirror();
-    private final Pose spike1 = new Pose(131, 84.14, Math.toRadians(0)).mirror();
-    private final Pose setUp2 = new Pose(95, 58.2, Math.toRadians(0)).mirror();
-    private final Pose leave2 = new Pose(110, 58.2, Math.toRadians(0)).mirror();
-    private final Pose spike2 = new Pose(133,59.2,Math.toRadians(0)).mirror();
-    private final Pose setUp3 = new Pose(93,35, Math.toRadians(0)).mirror();
-    private final Pose spike3 = new Pose(135, 35, Math.toRadians(0)).mirror();
-    private final Pose setUpH = new Pose(128, 52, Math.toRadians(-90)).mirror();
-    private final Pose humanPose = new Pose(130,7, Math.toRadians(-90)).mirror();
-    private final Pose gintakeAwayPose1 = new Pose(102.65, 57.4, 0).mirror();
-    private final Pose gintakePose = new Pose(13.47, 59.26086, 2.628); //1 degree = 0.01745329251994329576923690768489 rad
-    private final Pose hitGate = new Pose(132.105, 70, Math.toRadians(-90)).mirror();
-    private final Pose hitGateRev = new Pose(132,60.6, Math.toRadians(-90)).mirror();
 
+    //1 degree = 0.01745329251994329576923690768489 rad
+    //1 inch = 1 inch
 
-    private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, setUpTwo, setUpThree, setUpHuman, human, returnShootHuman, gintakeAway, gintake, returnToShootGintake, gintakeSetup;
+    private final Pose startPose = new Pose(26.678,126.578, 2.4534).mirror();
+    private final Pose PreshootPose = new Pose(85.8,75.24, Math.toRadians(38.937));
+    private final Pose shootPose = new Pose(85.8,79.24, 0);
+    private final Pose lastShootPose = new Pose(84,109, 0);
+    private final Pose spike1 = new Pose(131, 84.14, Math.toRadians(0));
+    private final Pose setUp2 = new Pose(95, 58.2, Math.toRadians(0));
+    private final Pose leave2 = new Pose(110, 58.2, Math.toRadians(0));
+    private final Pose spike2 = new Pose(133,59.2,Math.toRadians(0));
+    private final Pose setUp3 = new Pose(93,35, Math.toRadians(0));
+    private final Pose spike3 = new Pose(135, 35, Math.toRadians(0));
+    private final Pose gintakeAwayPose1 = new Pose(102.65, 57.4, 0);
+    private final Pose gintakePose = new Pose(12.47, 58.06086, 2.568).mirror();
+
+    private PathChain driveStartPosShootPos, spikeOne, spikeTwo, spikeThree, returnToShoot1, returnToShoot2, returnToShoot3, gintakeAway, gintake, returnToShootGintake;
 
     public void buildPaths() {
         // put in coordinates for starting pose > ending pose
@@ -97,7 +87,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .addParametricCallback(.4, () -> follower.setMaxPower(0.8))
                 .addParametricCallback(.5, () -> intake.setAllPower(1))
-                 .addParametricCallback(0.99, () -> follower.setMaxPower(1))
+                .addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
         spikeOne = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, spike1))
@@ -107,15 +97,7 @@ public class Blue_Close_18 extends LinearOpMode {
         returnToShoot1 = follower.pathBuilder()
                 .addPath(new BezierLine(spike1, lastShootPose))
                 .setLinearHeadingInterpolation(spike1.getHeading(), shootPose.getHeading())
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
-        setUpTwo = follower.pathBuilder()
-                .addPath(new BezierLine(PreshootPose, setUp2))
-                .setLinearHeadingInterpolation(startPose.getHeading(), setUp2.getHeading())
-                .build();
-
         spikeTwo = follower.pathBuilder()
                 .addPath(new BezierLine(PreshootPose, setUp2))
                 .setLinearHeadingInterpolation(startPose.getHeading(), setUp2.getHeading())
@@ -127,12 +109,6 @@ public class Blue_Close_18 extends LinearOpMode {
                 .setLinearHeadingInterpolation(spike2.getHeading(), leave2.getHeading())
                 .addPath(new BezierLine(leave2, shootPose))
                 .setLinearHeadingInterpolation(leave2.getHeading(), shootPose.getHeading())
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.25))
-                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
-                .build();
-        setUpThree = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, setUp3))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), setUp3.getHeading())
                 .build();
         spikeThree = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, setUp3))
@@ -144,38 +120,17 @@ public class Blue_Close_18 extends LinearOpMode {
                 .addPath(new BezierLine(spike3, shootPose))
                 .setLinearHeadingInterpolation(spike3.getHeading(), shootPose.getHeading())
                 .build();
-        setUpHuman = follower.pathBuilder()
-                .addPath(new BezierLine(shootPose, setUpH))
-                .setLinearHeadingInterpolation(shootPose.getHeading(), setUpH.getHeading())
-                .build();
-        human = follower.pathBuilder()
-                .addPath(new BezierLine(setUpH, humanPose))
-                .setLinearHeadingInterpolation(setUpH.getHeading(), humanPose.getHeading())
-                .build();
-        returnShootHuman = follower.pathBuilder()
-                .addPath(new BezierLine(humanPose, shootPose))
-                .setLinearHeadingInterpolation(humanPose.getHeading(), shootPose.getHeading())
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.3))
-                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
-                .build();
-        gintakeSetup = follower.pathBuilder()
+        gintake = follower.pathBuilder()
                 .addPath(new BezierLine(shootPose, gintakeAwayPose1))
                 .setLinearHeadingInterpolation(shootPose.getHeading(), gintakeAwayPose1.getHeading())
-                .build();
-        gintake = follower.pathBuilder()
                 .addPath(new BezierLine(gintakeAwayPose1, gintakePose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), gintakePose.getHeading())
                 .build();
-        gintakeAway = follower.pathBuilder()
+        returnToShootGintake = follower.pathBuilder()
                 .addPath(new BezierLine(gintakePose, gintakeAwayPose1))
                 .setLinearHeadingInterpolation(gintakePose.getHeading(), gintakeAwayPose1.getHeading())
-                .build();
-
-        returnToShootGintake = follower.pathBuilder()
                 .addPath(new BezierLine(gintakeAwayPose1, shootPose))
                 .setLinearHeadingInterpolation(gintakeAwayPose1.getHeading(), shootPose.getHeading())
-                //.addParametricCallback(.85, () -> follower.setMaxPower(0.2))
-                //.addParametricCallback(0.99, () -> follower.setMaxPower(1))
                 .build();
 
     }
@@ -217,18 +172,16 @@ public class Blue_Close_18 extends LinearOpMode {
         opModeTimer = new Timer();
         opModeTimer.resetTimer();
         follower = Constants.createFollower(hardwareMap);
-        idleShoot = new PathState[]{PathState.SPIKE_ONE, PathState.SPIKE_TWO, PathState.GINTAKE};
-        count = 0;
         double shootTime = 0.4;
         gintakeCount = 1;
         // TODO add in any other init mechanisms
 
         util = new Util();
         shooter = new Mortar(hardwareMap, util.deviceConf);
-        turret = new Turret(hardwareMap, util.deviceConf, new Pose(26.678,126.578, 2.4534), follower);
+        turret = new Turret(hardwareMap, util.deviceConf, new Pose(26.678,126.578, 2.4534).mirror(), follower);
         intake = new Intake(hardwareMap, util.deviceConf);
         gate = new Gate(hardwareMap, util.deviceConf);
-        hood = new Hood(hardwareMap, util.deviceConf, new Pose(26.678,126.578, 2.4534));
+        hood = new Hood(hardwareMap, util.deviceConf, new Pose(26.678,126.578, 2.4534).mirror());
         signal = new Signal(hardwareMap, util.deviceConf);
         rail = new Rail(hardwareMap, util.deviceConf);
         bottomSensor = new BottomSensor(hardwareMap, util.deviceConf);
@@ -236,7 +189,7 @@ public class Blue_Close_18 extends LinearOpMode {
         topSensor = new TopSensor(hardwareMap, util.deviceConf);
         double offset = 0;
 
-        turret.setBasketPos(Turret.blueBasket);
+        turret.setBasketPos(Turret.redBasket);
         follower.setPose(startPose);
         buildPaths();
 
@@ -246,7 +199,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 .onEnter( () -> {
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 15;
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + offset;
                     shooter.setVelocity(shooterTargetVel);
                     follower.followPath(driveStartPosShootPos, true);
                     shooting=true;
@@ -256,31 +209,15 @@ public class Blue_Close_18 extends LinearOpMode {
                     shooting = true;
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 15;
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + offset;
                     shooter.setVelocity(shooterTargetVel);
                     gate.setPosition(Gate.OPEN);
                 })
                 .transition( () -> follower.atPose(PreshootPose, 1, 1, Math.toRadians(6)), PathState.SPIKE_TWO)
 
 
-/*
-                .state(PathState.SET_UP2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                    shooter.setVelocity(1480);
-                    shooting = false;
-                    follower.followPath(setUpTwo, true);
-                })
-                .loop( () -> {
-                    gate.setPosition(Gate.CLOSE);
-                    shooter.setVelocity(1480);
-                    shooting = false;
-                    intaking = false;
-                })
 
 
-                .transition( () -> follower.atPose(setUp2, 0.5, 0.5, Math.toRadians(5)), PathState.SPIKE_TWO)
-*/
                 .state(PathState.SPIKE_TWO)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
@@ -295,6 +232,7 @@ public class Blue_Close_18 extends LinearOpMode {
                     intaking = true;
                 })
                 .transition( () -> ballCount == 3 || follower.atPose(spike2, 0.5, 0.5), PathState.RETURN_SHOOT2)
+                .transitionTimed(2, PathState.RETURN_SHOOT2)
 
                 .state(PathState.RETURN_SHOOT2)
                 .onEnter( () -> {
@@ -311,7 +249,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 .onExit( () -> {
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 10;
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + offset;
                     shooter.setVelocity(shooterTargetVel);
                     gate.setPosition(Gate.CLOSE);
                 })
@@ -323,13 +261,16 @@ public class Blue_Close_18 extends LinearOpMode {
                     gate.setPosition(Gate.OPEN);
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + 10;
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + offset;
                     shooter.setVelocity(shooterTargetVel);
                     shooting = true;
                     intaking = false;
                     intake.setAllPower(1);
                 })
                 .transitionTimed(1, PathState.GINTAKE)
+
+
+
 
 
                 .state(PathState.GINTAKE)
@@ -346,7 +287,6 @@ public class Blue_Close_18 extends LinearOpMode {
                 })
                 .transitionTimed(1.5, PathState.IDLE_GATE)
 
-
                 .state(PathState.IDLE_GATE)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
@@ -357,17 +297,6 @@ public class Blue_Close_18 extends LinearOpMode {
                 })
                 .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE)
                 .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE)
-
-
-                .state(PathState.GINTAKE_AWAY)
-                .onEnter( () -> {
-                    ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
-                    gate.setPosition(Gate.OPEN);
-                    intaking = true;
-                    follower.followPath(gintakeAway, true);
-                })
-                .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE)
-
 
                 .state(PathState.RETURN_SHOOT_GINTAKE)
                 .onEnter( () -> {
@@ -384,7 +313,6 @@ public class Blue_Close_18 extends LinearOpMode {
                 })
                 .transition( () -> follower.atPose(shootPose, 0.5, 0.5, Math.toRadians(5)), PathState.GINTAKE_SHOOT)
 
-
                 .state(PathState.GINTAKE_SHOOT)
                 .onEnter( () -> {
                     //turret.setAngleOffset(-4);
@@ -397,6 +325,9 @@ public class Blue_Close_18 extends LinearOpMode {
                     intake.setAllPower(1);
                 })
                 .transitionTimed(shootTime, PathState.GINTAKE2)
+
+
+
 
 
                 .state(PathState.GINTAKE2)
@@ -413,7 +344,6 @@ public class Blue_Close_18 extends LinearOpMode {
                 })
                 .transitionTimed(1, PathState.IDLE_GATE2)
 
-
                 .state(PathState.IDLE_GATE2)
                 .onEnter( () -> {
                     gate.setPosition(Gate.CLOSE);
@@ -424,16 +354,7 @@ public class Blue_Close_18 extends LinearOpMode {
 
                 })
                 .transition( () -> ballCount == 3, PathState.RETURN_SHOOT_GINTAKE2)
-                .transitionTimed(4, PathState.RETURN_SHOOT_GINTAKE2)
-
-
-                .state(PathState.GINTAKE_AWAY2)
-                .onEnter( () -> {
-                    gate.setPosition(Gate.OPEN);
-                    intaking = true;
-                    follower.followPath(gintakeAway, true);
-                })
-                .transition( () -> !follower.isBusy(), PathState.RETURN_SHOOT_GINTAKE2)
+                .transitionTimed(3, PathState.RETURN_SHOOT_GINTAKE2)
 
                 .state(PathState.RETURN_SHOOT_GINTAKE2)
                 .onEnter( () -> {
@@ -452,7 +373,6 @@ public class Blue_Close_18 extends LinearOpMode {
 
                 .state(PathState.GINTAKE_SHOOT2)
                 .onEnter( () -> {
-                    //turret.setAngleOffset(-4);
                 })
                 .loop( () -> {
                     ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
@@ -464,19 +384,10 @@ public class Blue_Close_18 extends LinearOpMode {
                 })
                 .transitionTimed(shootTime, PathState.SPIKE_THREE)
 
-/*
-                .state(PathState.SET_UP3)
-                .onEnter( () -> {
-                    //turret.setAngleOffset(4);
-                    shooting = false;
-                    follower.followPath(setUpThree, true);
-                })
-                .loop( () -> {
-                    shooting = false;
-                    intaking = false;
-                })
-                .transition( () -> !follower.isBusy(), PathState.SPIKE_THREE)
-*/
+
+
+
+
                 .state(PathState.SPIKE_THREE)
                 .onEnter( () -> {
                     shooting = false;
@@ -518,6 +429,10 @@ public class Blue_Close_18 extends LinearOpMode {
                 .transitionTimed(shootTime, PathState.SPIKE_ONE)
 
 
+
+
+
+
                 .state(PathState.SPIKE_ONE)
                 .onEnter( () -> {
                     shooting = false;
@@ -530,7 +445,6 @@ public class Blue_Close_18 extends LinearOpMode {
                 .transitionTimed(2, PathState.RETURN_SHOOT1)
                 .transition( () -> ballCount == 3 || follower.atPose(spike1, 0.5, 0.5), PathState.RETURN_SHOOT1)
 
-
                 .state(PathState.RETURN_SHOOT1)
                 .onEnter( () -> {
                     //turret.setAngleOffset(-2);
@@ -541,7 +455,7 @@ public class Blue_Close_18 extends LinearOpMode {
                     gate.setPosition(Gate.OPEN);
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + offset;
                     shooter.setVelocity(shooterTargetVel);
                 })
                 .transition( () -> follower.atPose(lastShootPose, .5, .5), PathState.SHOOT_ONE)
@@ -553,10 +467,9 @@ public class Blue_Close_18 extends LinearOpMode {
                     intake.setAllPower(1);
                     double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
                     hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
+                    shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm() + offset;
                     shooter.setVelocity(shooterTargetVel);
                 })
-
 
 
                 .build();
@@ -564,14 +477,13 @@ public class Blue_Close_18 extends LinearOpMode {
 
 
         waitForStart();
-        machine.start();
 
         opModeTimer.resetTimer();
         Turret.tracking = true;
         rail.setPosition(Rail.INDEX);
-        //shooter.setVelocity(shooter.calcVelocity((71-20)*Math.sqrt(2)));
-        //shooter.setVelocity(1485);
         ballCount = bottomSensor.hasBall() + middleSensor.hasBall() + topSensor.hasBall();
+
+        machine.start();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -584,9 +496,7 @@ public class Blue_Close_18 extends LinearOpMode {
                 hub.clearBulkCache();
             }
 
-            double goalDist = Math.sqrt(Math.pow(turret.distanceToBasket().getX(), 2) + Math.pow(turret.distanceToBasket().getY(), 2));
-            hood.hoodIncrement(0, ShooterTable.getShotSolution(goalDist).getHoodP());
-            shooterTargetVel = (int)ShooterTable.getShotSolution(goalDist).getRpm();
+
             follower.update();
             machine.update();
             intakeBalls();
@@ -611,7 +521,6 @@ public class Blue_Close_18 extends LinearOpMode {
             telemetry.addData("Gate Position", gate.getPosition());
             telemetry.addData("Path time", pathTimer.getElapsedTimeSeconds());
             telemetry.addData("opModeTimer", opModeTimer.getElapsedTimeSeconds());
-            //telemetry.addData("count", count);
             telemetry.addData("ball count", ballCount);
             telemetry.addData("gintakeCount", gintakeCount);
             telemetry.addData("shooter vel", shooter.getVelocity());

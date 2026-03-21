@@ -33,10 +33,10 @@ public class BottomSensor {
         //telemetry.addData("blue", normBlue);
         //telemetry.addData("Color: ", getColor());
 
-        if ((normGreen > normBlue && normGreen > normRed) && (.07 < normGreen && normGreen < .08)) {
+        if (normGreen < .08) {
             color = "GREEN";
         }
-        else if ((.04 < normRed && normRed < .045)) {
+        else if ((normRed < .045)) {
             color = "PURPLE";
         }
         else {

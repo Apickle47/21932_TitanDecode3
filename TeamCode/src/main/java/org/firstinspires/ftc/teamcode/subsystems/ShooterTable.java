@@ -12,12 +12,12 @@ public class ShooterTable {
             new ShotPoint(80.57, 1380, 0.7),
             new ShotPoint(91.65, 1460, 0.65),
             new ShotPoint(103.30, 1550, 0.6),
-            new ShotPoint(113.61, 1620, 0.55),
-            new ShotPoint(117.13, 1660, 0.55),
-            new ShotPoint(132.19, 1840, 0.45),
-            new ShotPoint(141.63, 1895, 0.45),
-            new ShotPoint(150.0, 1945, 0.45),
-            new ShotPoint(170.80, 2070, 0.45),
+            new ShotPoint(113.61, 1640, 0.575),
+            new ShotPoint(117.13, 1680, 0.55),
+            new ShotPoint(132.19, 1800, 0.55),
+            new ShotPoint(141.63, 1845, 0.55),
+            new ShotPoint(150.0, 1905, 0.5),
+            new ShotPoint(170.80, 2020, 0.5),
 
             /*
             new ShotPoint(55.425, 1250, 0.75),

@@ -47,6 +47,8 @@ public class ColorSensorTest extends OpMode {
         telemetry.addData("bottom sensor G:", Bsensor.getG());
         telemetry.addData("bottom sensor B:", Bsensor.getB());
         telemetry.addData("bottom color", Bsensor.getColor());
+        telemetry.addLine();
+        telemetry.addData("ball count", Tsensor.hasBall() + Msensor.hasBall() + Bsensor.hasBall());
         telemetry.update();
     }
 
